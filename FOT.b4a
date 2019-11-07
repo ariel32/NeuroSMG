@@ -1,0 +1,325 @@
+﻿Build1=Default,FOT.test.NeuroSMG
+File1=login.bal
+File2=main.bal
+FileGroup1=Default Group
+FileGroup2=Default Group
+Group=Default Group
+IconFile=
+Library1=core
+Library2=messharelibrary
+Library3=phone
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="4" />~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>~\n~	android:targetSdkVersion="19")~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~
+Module1=Starter
+NumberOfFiles=2
+NumberOfLibraries=3
+NumberOfModules=1
+Version=9.01
+@EndOfDesignText@
+#Region Module Attributes
+	#FullScreen: True
+	#IncludeTitle: False
+	#ApplicationLabel: FOT
+	#VersionCode: 1
+	#VersionName: SweetRain
+	#SupportedOrientations: portrait
+	#CanInstallToExternalStorage: True
+#End Region
+
+'Activity module
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Dim FOTtestTimer As Timer
+End Sub
+
+Sub Globals
+	Dim FOTCanvasRes As Canvas
+	Dim FOTBitmapRes As Bitmap
+	Dim FOTEditTextName As EditText
+	Dim FOTButtonHand As Button
+	Dim FOTLabelTicks As Label
+	Dim FOTTimerLabel As Label
+	Dim FOTButtonReset As Button
+	Dim FOTButtonShare As Button
+	Dim FOTButtonDelete As Button
+	
+	Dim FOTtestDuration As Int
+	Dim FOTcurrentTime As Int
+	Dim FOTcoords As String
+	Dim FOTtickduration As String
+	Dim FOTTimeLeft As Int
+	Dim FOTTimerStarted As Boolean
+	Dim FOThand As String
+	Dim FOTsession As Long
+	Dim FOTWriter As TextWriter
+	Dim FOTnow As Long
+	Dim FOTresult As List
+	Dim FOTticks As List
+	Dim FOTx As Float
+	Dim FOTy As Float
+	Dim FOTt1, FOTt2, duration As Long
+	Dim FOTlogged As Boolean
+	
+	Dim Vibrate As PhoneVibrate
+	Dim sharefname As String
+	
+	Private FOTEditTextLName As EditText
+	Private FOTEditTextLAge As EditText
+	Private FOTToggleButtonLSex As ToggleButton
+	Private FOTToggleButtonLHand As ToggleButton
+	Private FOTButtonLStart As Button
+	Dim FOTname, FOTdhand As String
+	Private FOTButtonLShare As Button
+	Private FOTButtonLDelete As Button
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	Dim p As Phone
+	p.SetScreenOrientation(1)
+	Activity.LoadLayout("main")
+	FOTCanvasRes.Initialize(Activity)
+	FOTBitmapRes.Initialize3(FOTCanvasRes.Bitmap)
+	
+	FOTtestTimer.Initialize("testTimer", 1000)
+	FOTtestTimer.Enabled = True
+	
+	FOTButtonHand.Text = "Правая рука"
+	
+	FOTTimerStarted = False
+	FOTtestDuration = 30
+	FOTTimeLeft = FOTtestDuration
+	FOThand = "right"
+	FOTButtonReset.Text = "Начать"
+	FOTTimerLabel.Text = FOTTimeLeft
+	
+	FOTresult.Initialize
+	FOTticks.Initialize
+	If File.Exists(File.DirRootExternal & "/FOT", "") = False Then
+		File.MakeDir(File.DirRootExternal, "/FOT")
+	End If
+	If File.Exists(File.DirRootExternal, "FOT/FOT.csv") = False Then
+		FOTButtonShare.Enabled  = False
+		FOTButtonDelete.Enabled = False
+	End If
+	FOTlogged = False
+	login
+End Sub	
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+Sub Activity_Touch(Action As Int, tx As Float, ty As Float)
+	Select Action
+		Case Activity.ACTION_DOWN
+			FOTt1 = DateTime.Now
+		Case Activity.ACTION_UP
+			FOTt2 = DateTime.Now
+			duration = FOTt2-FOTt1
+	End Select
+	If Action = Activity.ACTION_UP And FOTButtonReset.Text = "Готов" Then
+		'remove previous results
+		If FOTTimerStarted = False Then
+			ClearResults
+			FOTButtonReset.Text = "Готов"
+			FOTTimerStarted = True
+			FOTButtonHand.Enabled  = False
+			FOTEditTextName.Enabled = False
+			FOTButtonReset.Enabled  = False
+			FOTButtonDelete.Enabled = False
+			FOTButtonShare.Enabled  = False
+			If FOThand = "right" Then
+				FOTsession = DateTime.Now
+			End If
+		End If
+		
+		FOTCanvasRes.DrawCircle(tx, ty, 7dip, Colors.Red, True, 3dip)
+		Activity.Invalidate3(tx - 7dip, ty - 7dip, tx + 7dip, ty + 7dip)
+		FOTnow = DateTime.Now
+		'Log(session)
+		FOTcurrentTime = FOTtestDuration - FOTTimeLeft + 1
+		FOTx = tx / GetDeviceLayoutValues.Width
+		FOTy = ty / GetDeviceLayoutValues.Height
+		
+		FOTcoords = FOTsession & ";" & FOTEditTextName.Text & ";" & FOTnow & ";" & FOTcurrentTime & ";" & duration & ";" & FOTx & ";" & FOTy & ";" & FOThand
+		Log(FOTcoords)
+		FOTresult.Add(FOTcoords)
+		
+		FOTticks.Add(FOTnow)
+		If FOTticks.Size > 1 Then
+			FOTtickduration = FOTticks.Get(FOTticks.Size-1)-FOTticks.Get(FOTticks.Size-2)
+			FOTLabelTicks.Text = FOTtickduration
+		End If
+	Else If Action = 0 And FOTButtonReset.Text = "Начать" And FOTlogged = True Then
+		Msgbox("", "Нажмите кнопку Начать")
+	Else If Action = 0 And FOTButtonReset.Text = "Сохранить" Then
+		Msgbox("", "Сохраните результаты перед продолжением!")
+	End If
+End Sub
+
+Sub ButtonReset_Click
+	If FOTButtonReset.Text = "Начать" Then
+		FOTButtonReset.Text = "Готов"
+		Msgbox("", "Коснитесь экрана для начала")
+	Else If FOTButtonReset.Text = "Готов" Then
+		Msgbox("", "Коснитесь экрана для начала")
+	Else If FOTButtonReset.Text = "Сохранить" Then
+		FOTWriter.Initialize(File.OpenOutput(File.DirRootExternal,"FOT/FOT.csv",True))
+		FOTWriter.WriteList(FOTresult)
+		FOTWriter.Close
+		FOTresult.Clear
+		
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirRootExternal & "/FOT/FOT.csv", True)
+		If File.Exists(File.DirRootExternal, "FOT/FOT.csv") = False Then
+			FOTButtonShare.Enabled  = False
+			FOTButtonDelete.Enabled = False
+		Else
+			FOTButtonShare.Enabled  = True
+			FOTButtonDelete.Enabled = True
+		End If
+		ClearResults
+		If FOThand = "right" Then
+			FOTlogged = False
+			login
+		End If
+	End If
+End Sub
+
+
+Sub testTimer_Tick
+	If FOTTimeLeft = 1 Then
+		FOTTimeLeft = FOTtestDuration
+		Vibrate.Vibrate (100)
+		FOTTimerLabel.Text = FOTTimeLeft
+		FOTLabelTicks.Text = ""
+		FOTButtonReset.Text = "Сохранить"
+		FOTTimerStarted = False
+		ToastMessageShow ("Время вышло!", False)
+		FOTButtonHand.Enabled  = True
+		FOTButtonReset.Enabled  = True
+		FOTEditTextName.Enabled = True
+		If File.Exists(File.DirRootExternal, "FOT/FOT.csv") = False Then
+			FOTButtonShare.Enabled  = False
+			FOTButtonDelete.Enabled = False
+		Else
+			FOTButtonShare.Enabled  = True
+			FOTButtonDelete.Enabled = True
+		End If
+		If FOTButtonHand.Text = "Правая рука" Then
+			FOThand = "left"
+			FOTButtonHand.Text = "Левая рука"
+		Else If FOTButtonHand.Text = "Левая рука" Then
+			FOThand = "right"
+			FOTButtonHand.Text = "Правая рука"
+		End If
+	End If
+	If FOTTimerStarted = True Then
+		FOTTimeLeft = FOTTimerLabel.Text - 1
+		FOTTimerLabel.Text = FOTTimeLeft
+	End If
+End Sub
+
+Sub ClearResults
+	FOTTimerStarted = False
+	FOTTimeLeft = FOTtestDuration
+	FOTTimerLabel.Text = FOTTimeLeft
+	FOTLabelTicks.Text = ""
+	If FOTticks.Size > 0 Then
+		FOTticks.Clear()
+	End If
+	FOTCanvasRes.DrawColor(Colors.Black)
+	Activity.Invalidate()
+	FOTButtonReset.Text = "Начать"
+End Sub
+
+Sub sharedata
+	Dim share As MESShareLibrary
+	sharefname = "FOT/FOT."& DateTime.Now & ".csv"
+	File.Copy(File.DirRootExternal, "FOT/FOT.csv", File.DirRootExternal, sharefname)
+	share.sharebinary("file://" & File.DirRootExternal & "/" & sharefname, "Text/csv", "Send backup file", "")
+End Sub
+
+Sub deletedata
+	Dim msgans As Int
+	msgans = Msgbox2("Вы действительно хотите очистить результаты всех исследований?", "", "Да", "Нет", "", Null)
+	If msgans = -1 Then
+		File.Copy(File.DirRootExternal, "FOT/FOT.csv", File.DirRootExternal, "FOT/backup.FOT.csv")
+		
+		Dim reslist As List
+		reslist.initialize
+		Dim resfile As String
+		reslist=File.ListFiles(File.DirRootExternal & "/FOT")
+		For i = reslist.Size-1 To 0 Step - 1
+			resfile=reslist.Get(i)
+			If resfile <> "backup.FOT.csv" Then
+				File.Delete(File.DirRootExternal & "/FOT",resfile)
+			End If
+		Next
+		
+		FOTButtonShare.Enabled  = False
+		FOTButtonDelete.Enabled = False
+		FOTButtonLShare.Enabled  = False
+		FOTButtonLDelete.Enabled = False
+	End If
+End Sub
+
+Sub ButtonShare_Click
+	sharedata
+End Sub
+
+Sub ButtonLShare_Click
+	sharedata
+End Sub
+
+Sub ButtonDelete_Click
+	deletedata
+End Sub
+
+Sub ButtonLDelete_Click
+	deletedata
+End Sub
+
+Sub login
+	If FOTlogged = False Then
+		Activity.RemoveAllViews
+		Activity.LoadLayout("login")
+	End If
+	If File.Exists(File.DirRootExternal, "FOT/FOT.csv") = False Then
+		FOTButtonLShare.Enabled  = False
+		FOTButtonLDelete.Enabled = False
+	End If
+End Sub
+
+Sub ButtonLStart_Click
+	If FOTEditTextLName.Text = "" Or FOTEditTextLAge.Text = "" Then
+		ToastMessageShow ("Корректно укажите данные!", False)
+	Else
+		FOTlogged = True
+		If FOTToggleButtonLHand.Checked = False Then
+			FOTdhand = "правая"
+		Else
+			FOTdhand = "левая"
+		End If
+		If FOTToggleButtonLSex.Checked = False Then
+			FOTname = FOTEditTextLName.Text&",муж,"&FOTEditTextLAge.Text&","&FOTdhand
+		Else
+			FOTname = FOTEditTextLName.Text&",жен,"&FOTEditTextLAge.Text&","&FOTdhand
+		End If
+		Activity.RemoveAllViews
+		Activity.LoadLayout("main")
+		If File.Exists(File.DirRootExternal, "FOT/FOT.csv") = False Then
+			FOTButtonShare.Enabled  = False
+			FOTButtonDelete.Enabled = False
+		End If
+		FOTEditTextName.Text = FOTname
+		FOTButtonHand.Text = "Правая рука"
+		FOTButtonReset.Text = "Начать"
+		FOTCanvasRes.Initialize(Activity)
+		FOTBitmapRes.Initialize3(FOTCanvasRes.Bitmap)
+	End If
+End Sub
+
