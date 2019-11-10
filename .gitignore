@@ -2,6 +2,7 @@
 Objects/**
 !Objects/NeuroSMG.apk
 B4XDrawer.bas
+FileProvider.bas
 NeuroSMG.b4a.meta
 Starter.bas
 icon.jpg
