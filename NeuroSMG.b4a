@@ -227,6 +227,9 @@ Sub Activity_Create(FirstTime As Boolean)
 	ListViewLeft.AddSingleLine("О программе")
 	
 	If FirstTime Then
+		If File.Exists(File.DirInternal & "out", "") = False Then
+			File.MakeDir(File.DirInternal, "out")
+		End If
 		If File.Exists(File.DirInternal & "FOT", "") = False Then
 			File.MakeDir(File.DirInternal, "FOT")
 		End If
@@ -505,11 +508,11 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					IATn = 1
 					
 					Msgbox("Исследование окончено, спасибо!","")
-					IATWriter.Initialize(File.OpenOutput(File.DirInternal,"IAT/IAT.csv",True))
+					IATWriter.Initialize(File.OpenOutput(File.DirInternal,"/IAT/IAT.csv",True))
 					IATWriter.WriteList(IATresult)
 					IATWriter.Close
 					IATresult.Clear
-					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "IAT/IAT.csv", True)
+					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/IAT/IAT.csv", True)
 				End If
 				
 				If IATerror = False Then
@@ -1035,11 +1038,14 @@ Sub GNGtestTimer_Tick
 		GNGt0 = DateTime.Now : GNGtime = 0
 		GNGn = GNGn + 1
 	Else 
-		ToastMessageShow("Исследование завершено!", True)
-		GNGInit
-		GNGWriter.Initialize(File.OpenOutput(File.DirInternal, "GNG/GNG.csv",True))
+		Msgbox("Исследование окончено, спасибо!","")
+		
+		GNGWriter.Initialize(File.OpenOutput(File.DirInternal, "/GNG/GNG.csv",True))
 		GNGWriter.WriteList(GNGresult)
 		GNGWriter.Close
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/GNG/GNG.csv", True)
+		
+		GNGInit
 	End If
 End Sub
 
@@ -1087,7 +1093,12 @@ End Sub
 
 Sub ArchiveButtonSave_Click
 	Dim Arc As Archiver
-	Arc.ZipFolder(File.DirInternal, File.DirInternal, "archive.zip", "arc")
+	File.Copy(File.DirInternal&"/FOT/", "FOT.csv", File.DirInternal&"/out/", "FOT.csv")
+	File.Copy(File.DirInternal&"/RAT/", "RAT.csv", File.DirInternal&"/out/", "RAT.csv")
+	File.Copy(File.DirInternal&"/IAT/", "IAT.csv", File.DirInternal&"/out/", "IAT.csv")
+	File.Copy(File.DirInternal&"/GNG/", "GNG.csv", File.DirInternal&"/out/", "GNG.csv")
+	
+	Arc.ZipFolder(File.DirInternal&"/out", File.DirInternal, "archive.zip", "arc")
 	
 	Dim FileToSend As String = "archive.zip"
 	File.Copy(File.DirInternal, FileToSend, Starter.Provider.SharedFolder, FileToSend)
