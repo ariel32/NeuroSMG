@@ -1,5 +1,6 @@
 ﻿Build1=Default,NeuroSMG.app
 File1=archive.bal
+File10=SCT.bal
 File2=FOT.bal
 File3=GNG.bal
 File4=hamburger.png
@@ -9,6 +10,7 @@ File7=login.bal
 File8=main.bal
 File9=RAT.bal
 FileGroup1=Default Group
+FileGroup10=Default Group
 FileGroup2=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
@@ -32,7 +34,7 @@ Module1=Starter
 Module2=B4XDrawer
 Module3=FileProvider
 Module4=test
-NumberOfFiles=9
+NumberOfFiles=10
 NumberOfLibraries=8
 NumberOfModules=4
 Version=9.01
@@ -96,6 +98,7 @@ Sub Process_Globals
 	Dim GNGtestTimer As Timer
 	Dim GNGsubtestTimer As Timer
 	Dim GNGcleanTimer As Timer
+	Dim SCTTimer As Timer
 	
 	Dim name As String
 	Dim age As String
@@ -127,8 +130,6 @@ Sub Globals
 	Dim FOTLabelName As Label
 	Dim FOTTimerLabel As Label
 	Dim FOTButtonReset As Button
-	Dim FOTButtonShare As Button
-	Dim FOTButtonDelete As Button
 	
 	Dim FOTtestDuration As Int
 	Dim FOTcurrentTime As Int
@@ -144,14 +145,12 @@ Sub Globals
 	Dim FOTx As Float
 	Dim FOTy As Float
 	Dim FOTt1, FOTt2, FOTduration As Long
-	Dim FOTlogged As Boolean
 	
 	Dim Vibrate As PhoneVibrate
-	Dim sharefname As String
 	
 	'''''''''''''''''''''' RAT
 	Dim RATLabelN, RATLabelInfo, RATLabelBank, RATLabelLastBallon As Label
-	Dim RATEditTextName As EditText
+	Dim RATLabelName As Label
 	Dim RATButtonSave As Button
 	Dim RATx0, RATy0 As Int
 	Dim RATstart, RATlogged As Boolean
@@ -173,7 +172,6 @@ Sub Globals
 	Dim RATWriter As TextWriter
 	Dim RATresult As List
 	Private RATButtonLStart As Button
-	Private RATEditTextLName As EditText
 	Private RATToggleButtonLSex As ToggleButton
 	Private RATEditTextLAge As EditText
 	Private RATButtonLShare As Button
@@ -193,7 +191,7 @@ Sub Globals
 	Dim IATblock, IATn, IATi, IATi0 As Int
 	Dim IATWriter As TextWriter
 	
-	Private IATLabelInfoLeft, IATLabelInfoRight, IATLabelInfoBottom, IATLabelInfo, IATLabelLeft, IATLabelRight, IATLabelInfoBottom As Label
+	Private IATLabelInfoLeft, IATLabelInfoRight, IATLabelInfoBottom, IATLabelInfo, IATLabelLeft, IATLabelRight, IATLabelInfoBottom, IATLabelName As Label
 	
 	'''''''''''''''''''''' GNG
 	Dim GNGLabel2, GNGLabel3, GNGLabel4, GNGLabel5 As Label
@@ -205,6 +203,16 @@ Sub Globals
 	Dim GNGWriter As TextWriter
 	Dim GNGmark As String
 	Dim GNGresult As List
+	
+	'''''''''''''''''''''' SCT
+	Dim SCTLabelName, SCTLabelInfo, SCTLabelPanel, SCTLabelLeft, SCTLabelRight As Label
+	Dim SCTx0 As Int
+	Dim SCTstarted As Boolean
+	Dim SCTside, SCTtColor, SCTtText, SCTtmp As String
+	Dim SCTt0, SCTt, SCTduration As Long
+	Dim SCTn As Int
+	Dim SCTWriter As TextWriter
+	Dim SCTresult As List
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -223,6 +231,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	ListViewLeft.AddSingleLine("RAT")
 	ListViewLeft.AddSingleLine("IAT")
 	ListViewLeft.AddSingleLine("GNG")
+	ListViewLeft.AddSingleLine("SCT")
 	ListViewLeft.AddSingleLine("Архив")
 	ListViewLeft.AddSingleLine("О программе")
 	
@@ -230,20 +239,8 @@ Sub Activity_Create(FirstTime As Boolean)
 		If File.Exists(File.DirInternal & "out", "") = False Then
 			File.MakeDir(File.DirInternal, "out")
 		End If
-		If File.Exists(File.DirInternal & "FOT", "") = False Then
-			File.MakeDir(File.DirInternal, "FOT")
-		End If
-		If File.Exists(File.DirInternal & "RAT", "") = False Then
-			File.MakeDir(File.DirInternal, "RAT")
-		End If
-		If File.Exists(File.DirInternal & "IAT", "") = False Then
-			File.MakeDir(File.DirInternal, "IAT")
-		End If
-		If File.Exists(File.DirInternal & "FOT", "") = False Then
-			File.MakeDir(File.DirInternal, "FOT")
-		End If
-		If File.Exists(File.DirInternal & "GNG", "") = False Then
-			File.MakeDir(File.DirInternal, "GNG")
+		If File.Exists(File.DirInternal & "data", "") = False Then
+			File.MakeDir(File.DirInternal, "data")
 		End If
 
 		ActiveView = "login"
@@ -296,6 +293,8 @@ Sub Activity_Resume
 		IATinit
 	Else If ActiveView = "GNG" Then
 		GNGInit
+	Else If ActiveView = "SCT" Then
+		SCTInit
 	Else If ActiveView = "archive" Then
 
 	End If
@@ -339,6 +338,10 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 		ActiveView = "GNG"
 		p.SetScreenOrientation(1)
 		GNGInit
+	Else If Value = "SCT" Then
+		ActiveView = "SCT"
+		p.SetScreenOrientation(1)
+		SCTInit
 	Else If Value = "Архив" Then
 		ACToolBarLight1.Title = "Архив"
 		ACToolBarLight1.SubTitle = "Операции с результатами"
@@ -400,7 +403,7 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 			Case Activity.ACTION_DOWN
 				t = DateTime.Now
 			Case Activity.ACTION_UP
-				If RATEditTextName.Text = "Введите имя:" Or RATEditTextName.Text = "" Then
+				If RATLabelName.Text = "Введите имя:" Or RATLabelName.Text = "" Then
 					ToastMessageShow ("Введите имя!", False)
 				Else
 					RATtime = DateTime.Now
@@ -508,11 +511,11 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					IATn = 1
 					
 					Msgbox("Исследование окончено, спасибо!","")
-					IATWriter.Initialize(File.OpenOutput(File.DirInternal,"/IAT/IAT.csv",True))
+					IATWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/IAT."& session & ".csv",True))
 					IATWriter.WriteList(IATresult)
 					IATWriter.Close
 					IATresult.Clear
-					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/IAT/IAT.csv", True)
+					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/IAT."& session & ".csv", True)
 				End If
 				
 				If IATerror = False Then
@@ -559,6 +562,34 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					else if IATn = 181 Then '71
 						IATblock = 8
 					End If
+				End If
+		End Select
+	else if ActiveView = "SCT" Then
+		Select Action
+			Case Activity.ACTION_DOWN
+				SCTt0 = DateTime.Now
+			Case Activity.ACTION_UP
+				If tx < SCTx0 Then
+					SCTside = "left"
+				Else
+					SCTside = "right"
+				End If
+
+				If SCTstarted Then
+					SCTt = DateTime.Now
+					SCTduration = SCTt-SCTt0
+					SCTtmp = session&";"&name&";"&SCTt&";"&SCTduration&";"&SCTside&";"&SCTtText&";"&SCTtColor&";"&SCTn
+					Log(SCTtmp)
+					SCTresult.Add(SCTtmp)
+					
+					SCTLabelPanel.Text = "" : SCTLabelPanel.TextColor = Colors.white
+					SCTtText = "" : SCTtColor = ""
+					SCTTimer.Enabled = True
+					
+					SCTn = SCTn + 1
+					SCTdoTest
+				Else
+					ToastMessageShow("Коснитесь центра экрана для начала", False)					
 				End If
 		End Select
 	End If
@@ -643,11 +674,11 @@ Sub FOTButtonReset_Click
 	Else If FOTButtonReset.Text = "Готов" Then
 		Msgbox("", "Коснитесь экрана для начала")
 	Else If FOTButtonReset.Text = "Сохранить" Then
-		FOTWriter.Initialize(File.OpenOutput(File.DirInternal,"FOT/FOT.csv",True))
+		FOTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/FOT."& session & ".csv",True))
 		FOTWriter.WriteList(FOTresult)
 		FOTWriter.Close
 		FOTresult.Clear
-		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/FOT/FOT.csv", True)
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/FOT."& session & ".csv", True)
 		
 		FOTClearResults
 	End If
@@ -725,8 +756,7 @@ Sub RATInit
 	RATCanvasRes.DrawColor(Colors.White)
 	RATCanvasRes.DrawCircle(RATx0, RATy0, RATr, RATbColor, True, 3dip)
 	
-	RATEditTextName.Text = name
-	RATEditTextName.Enabled = False
+	RATLabelName.Text = name
 	RATCanvasRes.DrawCircle(RATx0, RATy0, RATr, RATbColor, True, 3dip)
 	RATE = 1
 	RATLabelN.Text = "Шар: " & RATln
@@ -737,7 +767,7 @@ End Sub
 
 
 Sub RATPump
-	If RATEditTextName.Text <> "Введите имя:" And RATEditTextName.Text <> "" And RATEditTextName.Text <> " " Then
+	If RATLabelName.Text <> "Введите имя:" And RATLabelName.Text <> "" And RATLabelName.Text <> " " Then
 		RATiter = RATiter + 1
 		If RATstart = True Then
 			RATr = 10
@@ -810,12 +840,12 @@ Sub RATPump
 			Else if RATE = 3 Then
 				Msgbox("Исследование окончено, спасибо!","")
 				RATresult.Add(session & ";" & RATtime & ";" & name & ";" & RATE & ";" & RATm & ";" & RATn & ";" & RATr & ";" & RATln & ";" & RATiter & ";" & RATciter & ";" & RATduration & ";" & RATmark & ";" & RATbank)
-				RATWriter.Initialize(File.OpenOutput(File.DirInternal, "RAT/RAT.csv",True))
+				RATWriter.Initialize(File.OpenOutput(File.DirInternal, "/data/RAT."& session & ".csv",True))
 				RATWriter.WriteList(RATresult)
 				RATWriter.Close
 				RATresult.Clear
 				RATE = 0
-				ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/RAT/RAT.csv", True)
+				ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/RAT."& session & ".csv", True)
 			End If
 			RATButtonSave.Enabled = False
 			RATLabelN.Text = "Шар: 1"
@@ -856,7 +886,8 @@ Sub IATinit
 	ACToolBarLight1.Title = "IAT"
 	ACToolBarLight1.SubTitle = "Implicit association test"
 	MainPanel.LoadLayout("IAT")
-		
+
+	IATLabelName.Text = name
 	IATblock = 1
 	IATn = 1
 	IATi0 = Rnd(0,10)
@@ -985,6 +1016,7 @@ Sub GNGInit
 	ACToolBarLight1.SubTitle = "Go/No go test"
 	MainPanel.LoadLayout("GNG")
 	
+	GNGLabelName.Text = name
 	GNGButtonStart.Text = "Начать" : GNGButtonStart.TextSize = 14
 	
 	GNGtestTimer.Initialize("GNGtestTimer", 1000)
@@ -1040,10 +1072,10 @@ Sub GNGtestTimer_Tick
 	Else 
 		Msgbox("Исследование окончено, спасибо!","")
 		
-		GNGWriter.Initialize(File.OpenOutput(File.DirInternal, "/GNG/GNG.csv",True))
+		GNGWriter.Initialize(File.OpenOutput(File.DirInternal, "/data/GNG."& session & ".csv",True))
 		GNGWriter.WriteList(GNGresult)
 		GNGWriter.Close
-		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/GNG/GNG.csv", True)
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/GNG."& session & ".csv", True)
 		
 		GNGInit
 	End If
@@ -1086,22 +1118,106 @@ Sub GNGButtonStart_click
 End Sub
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''                      SCT                      '''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Sub SCTInit
+	ACToolBarLight1.Title = "SCT"
+	ACToolBarLight1.SubTitle = "Stroop color test"
+	MainPanel.LoadLayout("SCT")
+	
+	SCTLabelName.Text = name
+	SCTLabelInfo.Text = "Выберите ЦВЕТ, которым окрашено слово"
+	SCTLabelPanel.Text = "НАЖМИТЕ ЗДЕСЬ ДЛЯ НАЧАЛА"
+	
+	SCTLabelLeft.Text = "Красный"
+	SCTLabelRight.Text = "Синий"
+	
+	SCTx0 = MainPanel.Width/2
+	SCTstarted = False
+	SCTn = 1
+	SCTtText = "" : SCTtColor = ""
+	
+	SCTTimer.Initialize("SCTTimer", 200)
+	SCTTimer.Enabled = False
+	
+	SCTresult.Initialize
+End Sub
+
+Sub SCTTimer_Tick
+	If SCTstarted Then
+		If SCTn = 51 Then
+			'SCTInit
+		else If SCTn <= 10 Then
+			If Rnd(0, 2) = 1 Then
+				SCTLabelPanel.Text = "КРАСНЫЙ" : SCTLabelPanel.TextColor = Colors.Red
+				SCTtText = "red" : SCTtColor = "red"
+			Else
+				SCTLabelPanel.Text = "СИНИЙ" : SCTLabelPanel.TextColor = Colors.blue
+				SCTtText = "blue" : SCTtColor = "blue"
+			End If
+		Else
+			Dim SCTrnd As Int
+			SCTrnd = Rnd(1, 5)
+			If SCTrnd = 1 Then
+				SCTLabelPanel.Text = "КРАСНЫЙ" : SCTLabelPanel.TextColor = Colors.Blue
+				SCTtText = "red" : SCTtColor = "blue"
+			Else if SCTrnd = 2 Then
+				SCTLabelPanel.Text = "СИНИЙ" : SCTLabelPanel.TextColor = Colors.red
+				SCTtText = "blue" : SCTtColor = "red"
+			Else if SCTrnd = 3 Then
+				SCTLabelPanel.Text = "КРАСНЫЙ" : SCTLabelPanel.TextColor = Colors.Red
+				SCTtText = "red" : SCTtColor = "red"
+			Else if SCTrnd = 4 Then
+				SCTLabelPanel.Text = "СИНИЙ" : SCTLabelPanel.TextColor = Colors.blue
+				SCTtText = "blue" : SCTtColor = "blue"
+			End If
+		End If
+	End If
+	SCTTimer.Enabled = False
+End Sub
+
+Sub SCTdoTest
+	If SCTstarted Then
+		If SCTn = 51 Then
+			Msgbox("Исследование окончено, спасибо!","")
+			SCTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/SCT."& session & ".csv",True))
+			SCTWriter.WriteList(SCTresult)
+			SCTWriter.Close
+			SCTresult.Clear
+			ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/SCT."& session & ".csv", True)
+			SCTInit
+		End If
+	End If
+End Sub
+
+Sub SCTLabelPanel_Click
+	If SCTstarted = False Then
+		SCTstarted = True
+		Msgbox("Внимание!", "Исследование начато")
+		SCTTimer.Enabled = True
+	End If
+End Sub
+
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''                    archive                    '''''''''''''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
 Sub ArchiveButtonSave_Click
-	Dim Arc As Archiver
-	File.Copy(File.DirInternal&"/FOT/", "FOT.csv", File.DirInternal&"/out/", "FOT.csv")
-	File.Copy(File.DirInternal&"/RAT/", "RAT.csv", File.DirInternal&"/out/", "RAT.csv")
-	File.Copy(File.DirInternal&"/IAT/", "IAT.csv", File.DirInternal&"/out/", "IAT.csv")
-	File.Copy(File.DirInternal&"/GNG/", "GNG.csv", File.DirInternal&"/out/", "GNG.csv")
-	
-	Arc.ZipFolder(File.DirInternal&"/out", File.DirInternal, "archive.zip", "arc")
-	
+	Dim arc As Archiver
+	Log(File.ListFiles(File.DirInternal & "/data"))
+	If File.ListFiles(File.DirInternal & "/data").Size > 0 Then
+		arc.ZipFolder(File.DirInternal & "/data", File.DirInternal & "/out", "archive.zip", "arc")
+	Else
+		Msgbox("А что архивировать собрались, если результатов нет?","Ошибка!")
+	End If
+End Sub
+
+Sub arc_ZipProgression(Count As Int, FileName As String)
+	Log(File.ListFiles(File.DirInternal & "/out"))
 	Dim FileToSend As String = "archive.zip"
-	File.Copy(File.DirInternal, FileToSend, Starter.Provider.SharedFolder, FileToSend)
+	File.Copy(File.DirInternal & "/out", FileToSend, Starter.Provider.SharedFolder, FileToSend)
 	Log(File.DirInternal)
 	Log(Starter.Provider.SharedFolder)
 	Log(Starter.Provider.GetFileUri(FileToSend))
@@ -1112,8 +1228,6 @@ Sub ArchiveButtonSave_Click
 	in.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
 	StartActivity(in)
 End Sub
-
-
 
 
 
