@@ -1,6 +1,8 @@
 ﻿Build1=Default,NeuroSMG.app
 File1=archive.bal
 File10=SCT.bal
+File11=STAI.csv
+File12=tests.bal
 File2=FOT.bal
 File3=GNG.bal
 File4=hamburger.png
@@ -11,6 +13,8 @@ File8=main.bal
 File9=RAT.bal
 FileGroup1=Default Group
 FileGroup10=Default Group
+FileGroup11=Default Group
+FileGroup12=Default Group
 FileGroup2=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
@@ -36,7 +40,7 @@ Module2=B4XDrawer
 Module3=FileProvider
 Module4=CustomListView
 Module5=test
-NumberOfFiles=10
+NumberOfFiles=12
 NumberOfLibraries=9
 NumberOfModules=5
 Version=9.01
@@ -216,8 +220,14 @@ Sub Globals
 	Dim SCTWriter As TextWriter
 	Dim SCTresult As List
 	
+	'''''''''''''''''''''' tests
+	Dim testsCurrent as String
+	Dim testsCustomListView As CustomListView
+	Private testsLabelQuestion As Label
+	
 	'''''''''''''''''''''' archive
 	Dim ArchiveCustomListView As CustomListView
+	
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -237,6 +247,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	ListViewLeft.AddSingleLine("IAT")
 	ListViewLeft.AddSingleLine("GNG")
 	ListViewLeft.AddSingleLine("SCT")
+	ListViewLeft.AddSingleLine("Тесты")
 	ListViewLeft.AddSingleLine("Архив")
 	ListViewLeft.AddSingleLine("О программе")
 	
@@ -347,6 +358,10 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 		ActiveView = "SCT"
 		p.SetScreenOrientation(1)
 		SCTInit
+	Else If Value = "Тесты" Then
+		ActiveView = "tests"
+		p.SetScreenOrientation(1)
+		testsInit
 	Else If Value = "Архив" Then
 		ActiveView = "archive"
 		p.SetScreenOrientation(1)
@@ -863,7 +878,7 @@ Sub RATPump
 		RATl = "name: "&name&"m: "&RATm&", n: "&RATn&", r: "&RATr&", Шар: "&RATln&", Iter: "&RATiter&", Citer: "&RATciter&", bank: "&RATbank&", mark: "&RATmark&", E: "&RATE
 		Log(RATl)
 		RATresult.Add(session&";"&RATtime&";"&name&";"&RATE&";"&RATm&";"&RATn&";"&RATr&";"&RATln&";"&RATiter&";"&RATciter&";"&RATduration&";"&RATmark&";"&RATbank)
-		RATLabelInfo.Text = RATl
+		'RATLabelInfo.Text = RATl
 		RATCanvasRes.DrawCircle(RATx0, RATy0, RATr, RATbColor, True, 3dip)
 		MainPanel.Invalidate3(RATx0 - 7dip, RATy0 - 7dip, RATx0 + 7dip, RATy0 + 7dip)
 			
@@ -1204,6 +1219,27 @@ Sub SCTLabelPanel_Click
 End Sub
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''                     tests                     '''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Sub testsInit
+	ACToolBarLight1.Title = "Тесты"
+	ACToolBarLight1.SubTitle = "Классические опросники"
+	MainPanel.LoadLayout("tests")
+	testsLabelQuestion.Text = "Выберите тест:"
+	
+	testsCurrent = "main"
+	testsCustomListView.AddTextItem("Шкала тревоги Спилбергера-Ханина", "STAIN")
+	
+End Sub
+
+
+Sub testsCustomListView_ItemClick (Index As Int, Value As Object)
+	If Value = "STAIN" Then
+		testsCurrent = "STAIN"
+		Log(Value)
+	End If
+End Sub
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''                    archive                    '''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -1221,7 +1257,6 @@ Sub archiveInit
 '	ArchiveCustomListView.AddTextItem(& CRLF &)
 End Sub
 
-
 Sub ArchiveButtonSave_Click
 	Dim arc As Archiver
 	Log(File.ListFiles(File.DirInternal & "/data"))
@@ -1233,8 +1268,8 @@ Sub ArchiveButtonSave_Click
 End Sub
 
 Sub arc_ZipDone(CompletedWithoutError As Boolean, NbOfFiles As Int)
-	Dim FileToSend As String = "archive.zip"
-	File.Copy(File.DirInternal & "/out", FileToSend, Starter.Provider.SharedFolder, FileToSend)
+	Dim FileToSend As String = "archive." & DateTime.Now & ".zip"
+	File.Copy(File.DirInternal & "/out", "archive.zip", Starter.Provider.SharedFolder, FileToSend)
 	
 	Dim in As Intent
 	in.Initialize(in.ACTION_SEND, "")
@@ -1243,6 +1278,7 @@ Sub arc_ZipDone(CompletedWithoutError As Boolean, NbOfFiles As Int)
 	in.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
 	StartActivity(in)
 End Sub
+
 
 
 
