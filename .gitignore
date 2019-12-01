@@ -1,9 +1,7 @@
 ﻿AutoBackups/**
 Objects/**
 !Objects/NeuroSMG.apk
-B4XDrawer.bas
-FileProvider.bas
-CustomListView.bas
+*.bas
 NeuroSMG.b4a.meta
 Starter.bas
 icon.jpg

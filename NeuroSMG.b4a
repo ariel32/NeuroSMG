@@ -26,6 +26,7 @@ FileGroup9=Default Group
 Group=Default Group
 IconFile=
 Library1=core
+Library10=randomaccessfile
 Library2=appcompat
 Library3=xui
 Library4=viewsex
@@ -39,10 +40,11 @@ Module1=Starter
 Module2=B4XDrawer
 Module3=FileProvider
 Module4=CustomListView
-Module5=test
+Module5=StateManager
+Module6=test
 NumberOfFiles=12
-NumberOfLibraries=9
-NumberOfModules=5
+NumberOfLibraries=10
+NumberOfModules=6
 Version=9.01
 @EndOfDesignText@
 #Region  Project Attributes 
@@ -110,6 +112,7 @@ Sub Process_Globals
 	Dim age As String
 	Dim sex As String
 	Dim dhand As String
+	Dim comment As String
 	Dim session As Long
 End Sub
 
@@ -121,12 +124,15 @@ Sub Globals
 	Private ListViewLeft As ListView
 	Private MainPanel As Panel
 	Dim p As Phone
+	Dim RESWriter As TextWriter
 	
 	'''''''''''''''''''''' Login
 	Private LoginEditTextName As EditText
 	Private LoginEditTextAge As EditText
+	Private LoginEditTextComment As EditText
 	Private LoginToggleButtonSex As ToggleButton
 	Private LoginToggleButtonHand As ToggleButton
+	Private LoginCheckBox As CheckBox
 	
 	'''''''''''''''''''''' FOT
 	Dim FOTCanvasRes As Canvas
@@ -221,7 +227,7 @@ Sub Globals
 	Dim SCTresult As List
 	
 	'''''''''''''''''''''' tests
-	Dim testsCurrent as String
+	Dim testsCurrent As String
 	Dim testsCustomListView As CustomListView
 	Private testsLabelQuestion As Label
 	
@@ -263,7 +269,7 @@ Sub Activity_Create(FirstTime As Boolean)
 		LoginInit
 		
 		'''''''''''''''''''''''' test only
-		name = "test" : age = 999 : sex = "aeldari" : dhand = "both"
+		'name = "test" : age = 999 : sex = "aeldari" : dhand = "both" : comment = "no comments"
 	End If
 End Sub
 
@@ -332,11 +338,7 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 	End If
 		
 	If Value = "Профиль" Then
-		ActiveView = "login"
-		ACToolBarLight1.Title = "Профиль"
-		ACToolBarLight1.SubTitle = "Основные данные"
-		MainPanel.LoadLayout("login")
-		
+		LoginInit
 		p.SetScreenOrientation(1)
 	Else If Value = "FOT" Then
 		ActiveView = "FOT"
@@ -387,15 +389,11 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 				FOTTimerStarted = True
 				FOTButtonHand.Enabled  = False
 				FOTButtonReset.Enabled  = False
-				If FOThand = "right" Then
-					session = DateTime.Now
-				End If
 			End If
 		
 			FOTCanvasRes.DrawCircle(tx, ty, 7dip, Colors.Red, True, 3dip)
 			MainPanel.Invalidate3(tx - 7dip, ty - 7dip, tx + 7dip, ty + 7dip)
 			FOTnow = DateTime.Now
-			'Log(session)
 			FOTcurrentTime = FOTtestDuration - FOTTimeLeft + 1
 			FOTx = tx / MainPanel.Width
 			FOTy = ty / MainPanel.Height
@@ -534,6 +532,10 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					IATWriter.WriteList(IATresult)
 					IATWriter.Close
 					IATresult.Clear
+					
+					RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+					RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+					RESWriter.Close
 					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/IAT."& session & ".csv", True)
 				End If
 				
@@ -622,6 +624,26 @@ Sub LoginInit
 	ACToolBarLight1.Title = "Профиль"
 	ACToolBarLight1.SubTitle = "Основные данные"
 	MainPanel.LoadLayout("login")
+	
+	If(StateManager.GetSetting("name")) <> "" Then
+		LoginCheckBox.Checked = True
+		name  = StateManager.GetSetting("name")
+		age   = StateManager.GetSetting("age")
+		sex   = StateManager.GetSetting("sex")
+		dhand = StateManager.GetSetting("dhand")
+	End If
+	LoginEditTextName.Text = StateManager.GetSetting("name")
+	LoginEditTextAge.Text = StateManager.GetSetting("age")
+	If StateManager.getSetting("sex") = "жен" Then
+		LoginToggleButtonSex.Checked = True
+	Else
+		LoginToggleButtonSex.Checked = False
+	End If
+	If StateManager.getSetting("dhand") = "левая" Then
+		LoginToggleButtonHand.Checked = True
+	Else
+		LoginToggleButtonHand.Checked = False
+	End If
 End Sub
 
 Sub LoginButtonStart_Click
@@ -641,12 +663,26 @@ Sub LoginButtonStart_Click
 		Else
 			sex = "жен"
 		End If
-		session = DateTime.Now
+				
+		If LoginCheckBox.Checked = True Then
+			StateManager.SetSetting("name", LoginEditTextName.Text)
+			StateManager.SetSetting("age", LoginEditTextAge.Text)
+			StateManager.SetSetting("sex", LoginEditTextAge.Text)
+			If LoginToggleButtonSex.Checked = False Then
+				StateManager.SetSetting("sex", "муж")
+			Else
+				StateManager.SetSetting("sex", "жен")
+			End If
+			If LoginToggleButtonHand.Checked = False Then
+				StateManager.SetSetting("dhand", "правая")
+			Else
+				StateManager.SetSetting("dhand", "левая")
+			End If
+		End If
+		
+		comment = LoginEditTextComment.Text
+		StateManager.SaveSettings
 	End If
-'	FOTButtonHand.Text = "Правая рука"
-'	FOTButtonReset.Text = "Начать"
-'	FOTCanvasRes.Initialize(MainPanel)
-'	FOTBitmapRes.Initialize3(FOTCanvasRes.Bitmap)
 End Sub
 
 Sub LoginButtonDelete_Click
@@ -654,6 +690,8 @@ Sub LoginButtonDelete_Click
 	age = ""   : LoginEditTextAge.Text = ""
 	sex = ""   : LoginToggleButtonSex.Checked = False
 	dhand = "" : LoginToggleButtonHand.Checked = False
+	comment = "" : LoginEditTextComment.Text = ""
+	LoginCheckBox.Checked = False
 End Sub
 
 
@@ -664,7 +702,8 @@ Sub FOTInit
 	ACToolBarLight1.Title = "FOT"
 	ACToolBarLight1.SubTitle = "Finger oscillation test"
 	MainPanel.LoadLayout("FOT")
-		
+	session = DateTime.Now
+	
 	FOTLabelName.Text = name
 		
 	FOTCanvasRes.Initialize(MainPanel)
@@ -697,6 +736,12 @@ Sub FOTButtonReset_Click
 		FOTWriter.WriteList(FOTresult)
 		FOTWriter.Close
 		FOTresult.Clear
+		If FOThand = "left" Then
+			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.Close
+		End If
+		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/FOT."& session & ".csv", True)
 		
 		FOTClearResults
@@ -749,7 +794,8 @@ Sub RATInit
 	ACToolBarLight1.Title = "RAT"
 	ACToolBarLight1.SubTitle = "Risk appetite test"
 	MainPanel.LoadLayout("RAT")
-		
+	session = DateTime.Now
+	
 	RATCanvasRes.Initialize(MainPanel)
 	RATCanvasRes.DrawColor(Colors.White)
 	RATx0 = MainPanel.Width/2
@@ -863,6 +909,11 @@ Sub RATPump
 				RATWriter.WriteList(RATresult)
 				RATWriter.Close
 				RATresult.Clear
+				
+				RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+				RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+				RESWriter.Close
+				
 				RATE = 0
 				ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/RAT."& session & ".csv", True)
 			End If
@@ -905,7 +956,8 @@ Sub IATinit
 	ACToolBarLight1.Title = "IAT"
 	ACToolBarLight1.SubTitle = "Implicit association test"
 	MainPanel.LoadLayout("IAT")
-
+	session = DateTime.Now
+	
 	IATLabelName.Text = name
 	IATblock = 1
 	IATn = 1
@@ -1034,6 +1086,7 @@ Sub GNGInit
 	ACToolBarLight1.Title = "GNG"
 	ACToolBarLight1.SubTitle = "Go/No go test"
 	MainPanel.LoadLayout("GNG")
+	session = DateTime.Now
 	
 	GNGLabelName.Text = name
 	GNGButtonStart.Text = "Начать" : GNGButtonStart.TextSize = 14
@@ -1094,6 +1147,11 @@ Sub GNGtestTimer_Tick
 		GNGWriter.Initialize(File.OpenOutput(File.DirInternal, "/data/GNG."& session & ".csv",True))
 		GNGWriter.WriteList(GNGresult)
 		GNGWriter.Close
+		
+		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.Close
+		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/GNG."& session & ".csv", True)
 		
 		GNGInit
@@ -1144,6 +1202,7 @@ Sub SCTInit
 	ACToolBarLight1.Title = "SCT"
 	ACToolBarLight1.SubTitle = "Stroop color test"
 	MainPanel.LoadLayout("SCT")
+	session = DateTime.Now
 	
 	SCTLabelName.Text = name
 	SCTLabelInfo.Text = "Выберите ЦВЕТ, которым окрашено слово"
@@ -1204,6 +1263,11 @@ Sub SCTdoTest
 			SCTWriter.WriteList(SCTresult)
 			SCTWriter.Close
 			SCTresult.Clear
+			
+			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.Close
+			
 			ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/SCT."& session & ".csv", True)
 			SCTInit
 		End If
@@ -1227,6 +1291,7 @@ Sub testsInit
 	ACToolBarLight1.SubTitle = "Классические опросники"
 	MainPanel.LoadLayout("tests")
 	testsLabelQuestion.Text = "Выберите тест:"
+	session = DateTime.Now
 	
 	testsCurrent = "main"
 	testsCustomListView.AddTextItem("Шкала тревоги Спилбергера-Ханина", "STAIN")
