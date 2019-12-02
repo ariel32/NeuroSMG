@@ -99,7 +99,7 @@ Sub Activity_CreateMenu(Menu As ACMenu)
 	Menu.Add(1, 1, "Контрольная группа", Null) : ACToolBarLight1.Menu.FindItem(1).Checkable = True
 	Menu.Add(2, 2, "Опытная группа", Null)     : ACToolBarLight1.Menu.FindItem(2).Checkable = True
 	
-	If StateManager.getSetting("group") = "Контрольная группа" Or StateManager.getSetting("group") = "" Then
+	If StateManager.getSetting2("group", "Контрольная группа") = "Контрольная группа" Then
 		ACToolBarLight1.Menu.FindItem(1).Checked = True
 		group = "Контрольная группа"
 	Else If StateManager.getSetting("group") = "Опытная группа" Then
@@ -107,7 +107,7 @@ Sub Activity_CreateMenu(Menu As ACMenu)
 		group = "Опытная группа"
 	End If
 End Sub
-	
+
 Sub Process_Globals
 	Dim ActiveView As String
 	Dim FOTtestTimer As Timer
