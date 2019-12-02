@@ -81,8 +81,8 @@ Sub Activity_CreateMenu(Menu As ACMenu)
 	Dim ph As Phone
 	Dim bd As BitmapDrawable
 
-	bd = ph.GetResourceDrawable(17301555)
-	Menu.Add2(10, 1, "Add", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
+'	bd = ph.GetResourceDrawable(17301555)
+'	Menu.Add2(10, 1, "Add", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
 '	
 '	bd = ph.GetResourceDrawable(17301564)
 '	Menu.Add2(10, 2, "Delete Round", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
@@ -90,14 +90,22 @@ Sub Activity_CreateMenu(Menu As ACMenu)
 '	bd = ph.GetResourceDrawable(17301566)
 '	Menu.Add2(10, 3, "Edit Round", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
 
-	bd = ph.GetResourceDrawable(17301577)
-	Menu.Add2(10, 4, "Pref", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
+'	bd = ph.GetResourceDrawable(17301577)
+'	Menu.Add2(10, 4, "Pref", bd).ShowAsAction = item.SHOW_AS_ACTION_IF_ROOM
 
 '	bd = ph.GetResourceDrawable(17301568)
 '	Menu.Add2(10, 5, "Help", bd).ShowAsAction = item.SHOW_AS_ACTION_ALWAYS
 	
+	Menu.Add(1, 1, "Контрольная группа", Null) : ACToolBarLight1.Menu.FindItem(1).Checkable = True
+	Menu.Add(2, 2, "Опытная группа", Null)     : ACToolBarLight1.Menu.FindItem(2).Checkable = True
 	
-	'Menu.Add(1, 2, "И?", Null)
+	If StateManager.getSetting("group") = "Контрольная группа" Then
+		ACToolBarLight1.Menu.FindItem(1).Checked = True
+		group = "Контрольная группа"
+	Else If StateManager.getSetting("group") = "Опытная группа" Then
+		ACToolBarLight1.Menu.FindItem(2).Checked = True
+		group = "Опытная группа"
+	End If
 End Sub
 	
 Sub Process_Globals
@@ -112,8 +120,9 @@ Sub Process_Globals
 	Dim age As String
 	Dim sex As String
 	Dim dhand As String
-	Dim comment As String
 	Dim session As Long
+	Dim comment As String
+	Dim group As String
 End Sub
 
 Sub Globals
@@ -243,7 +252,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	ToolbarHelper.ShowUpIndicator = True 'set to true to show the up arrow
 	Dim bd As BitmapDrawable
 	bd.Initialize(LoadBitmap(File.DirAssets, "hamburger.png"))
-	ToolbarHelper.UpIndicatorDrawable =  bd
+	ToolbarHelper.UpIndicatorDrawable = bd
 	ACToolBarLight1.InitMenuListener
 	Drawer.LeftPanel.LoadLayout("Left")
 	
@@ -278,6 +287,17 @@ Sub ACToolBarLight1_NavigationItemClick
 End Sub
 
 Sub ACToolBarLight1_MenuItemClick (Item As ACMenuItem)
+	If Item.Id = 1 Then
+		ACToolBarLight1.Menu.FindItem(2).Checked = False
+		group = "Контрольная группа"
+	Else If Item.Id = 2 Then
+		ACToolBarLight1.Menu.FindItem(1).Checked = False
+		group = "Опытная группа"
+	End If
+
+	If Item.Checkable = True Then
+		Item.Checked = Not(Item.Checked)
+	End If
 '	If Item.Title = "Add" Then
 '		cs.Initialize.Append("FontAwesome: ").Typeface(Typeface.FONTAWESOME).Append(Chr(0xF209)).PopAll
 '		ToastMessageShow(cs, True)
@@ -372,6 +392,7 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 End Sub
 
 Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
+	Log(group)
 	If ActiveView = "FOT" Then
 		Select Action
 			Case MainPanel.ACTION_DOWN
@@ -534,7 +555,7 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					IATresult.Clear
 					
 					RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-					RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+					RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 					RESWriter.Close
 					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/IAT."& session & ".csv", True)
 				End If
@@ -678,10 +699,11 @@ Sub LoginButtonStart_Click
 			Else
 				StateManager.SetSetting("dhand", "левая")
 			End If
+			StateManager.SetSetting("group", group)
+			StateManager.SaveSettings
 		End If
 		
 		comment = LoginEditTextComment.Text
-		StateManager.SaveSettings
 	End If
 End Sub
 
@@ -692,6 +714,12 @@ Sub LoginButtonDelete_Click
 	dhand = "" : LoginToggleButtonHand.Checked = False
 	comment = "" : LoginEditTextComment.Text = ""
 	LoginCheckBox.Checked = False
+	StateManager.SetSetting("name", "")
+	StateManager.SetSetting("age", "")
+	StateManager.SetSetting("sex", "муж")
+	StateManager.SetSetting("dhand", "правая")
+	StateManager.SetSetting("group", "Контрольная группа")
+	StateManager.SaveSettings
 End Sub
 
 
@@ -738,7 +766,7 @@ Sub FOTButtonReset_Click
 		FOTresult.Clear
 		If FOThand = "left" Then
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 			RESWriter.Close
 		End If
 		
@@ -911,7 +939,7 @@ Sub RATPump
 				RATresult.Clear
 				
 				RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-				RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+				RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 				RESWriter.Close
 				
 				RATE = 0
@@ -1149,7 +1177,7 @@ Sub GNGtestTimer_Tick
 		GNGWriter.Close
 		
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 		RESWriter.Close
 		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/GNG."& session & ".csv", True)
@@ -1265,7 +1293,7 @@ Sub SCTdoTest
 			SCTresult.Clear
 			
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 			RESWriter.Close
 			
 			ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/SCT."& session & ".csv", True)
@@ -1324,7 +1352,7 @@ End Sub
 
 Sub ArchiveButtonSave_Click
 	Dim arc As Archiver
-	Log(File.ListFiles(File.DirInternal & "/data"))
+	
 	If File.ListFiles(File.DirInternal & "/data").Size > 0 Then
 		arc.ASyncZipFolder(File.DirInternal & "/data", File.DirInternal & "/out", "archive.zip", "arc")
 	Else
