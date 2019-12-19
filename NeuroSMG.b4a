@@ -1,21 +1,49 @@
 ﻿Build1=Default,NeuroSMG.app
-File1=archive.bal
-File10=SCT.bal
-File11=STAI.csv
-File12=tests.bal
-File2=FOT.bal
-File3=GNG.bal
-File4=hamburger.png
-File5=IAT.bal
-File6=Left.bal
-File7=login.bal
-File8=main.bal
-File9=RAT.bal
+File1=16pf.csv
+File10=GNG.bal
+File11=hamburger.png
+File12=IAT.bal
+File13=Left.bal
+File14=leongard.csv
+File15=login.bal
+File16=main.bal
+File17=mini.mult.csv
+File18=questionrequester.bal
+File19=RAT.bal
+File2=anamnesis.csv
+File20=schubert.csv
+File21=SCT.bal
+File22=smil.f.csv
+File23=smil.m.csv
+File24=stai.csv
+File25=test.bal
+File26=tests.bal
+File3=archive.bal
+File4=audit.csv
+File5=buss.durkey.csv
+File6=cage.csv
+File7=coping.csv
+File8=eysenck.csv
+File9=FOT.bal
 FileGroup1=Default Group
 FileGroup10=Default Group
 FileGroup11=Default Group
 FileGroup12=Default Group
+FileGroup13=Default Group
+FileGroup14=Default Group
+FileGroup15=Default Group
+FileGroup16=Default Group
+FileGroup17=Default Group
+FileGroup18=Default Group
+FileGroup19=Default Group
 FileGroup2=Default Group
+FileGroup20=Default Group
+FileGroup21=Default Group
+FileGroup22=Default Group
+FileGroup23=Default Group
+FileGroup24=Default Group
+FileGroup25=Default Group
+FileGroup26=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
 FileGroup5=Default Group
@@ -27,6 +55,8 @@ Group=Default Group
 IconFile=
 Library1=core
 Library10=randomaccessfile
+Library11=dialogs
+Library12=id
 Library2=appcompat
 Library3=xui
 Library4=viewsex
@@ -42,8 +72,8 @@ Module3=FileProvider
 Module4=CustomListView
 Module5=StateManager
 Module6=test
-NumberOfFiles=12
-NumberOfLibraries=10
+NumberOfFiles=26
+NumberOfLibraries=12
 NumberOfModules=6
 Version=9.01
 @EndOfDesignText@
@@ -236,13 +266,30 @@ Sub Globals
 	Dim SCTresult As List
 	
 	'''''''''''''''''''''' tests
-	Dim testsCurrent As String
+	Dim testi As Int
+	Dim testtime As Long
+	Dim testCurrent As String
+	Dim questions As List
+	Dim testWriter As TextWriter
+	Dim testresult As List
 	Dim testsCustomListView As CustomListView
 	Private testsLabelQuestion As Label
+	Private testLabel As Label
+	Private testLabelname As Label
+	Private testButton1 As Button
+	Private testButton2 As Button
+	Private testButton3 As Button
+	Private testButton4 As Button
+	Private testButton5 As Button
+	
+	Dim questionPicker As CustomLayoutDialog
+	Private questionrequesterLabel As Label
+	Private questionrequesterEditText As EditText
 	
 	'''''''''''''''''''''' archive
+	Dim FileToSend As String
 	Dim ArchiveCustomListView As CustomListView
-	
+	Private ArchiveButtonClearResults As Button
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -337,6 +384,8 @@ Sub Activity_Resume
 		GNGInit
 	Else If ActiveView = "SCT" Then
 		SCTInit
+	Else If ActiveView = "tests" Then
+		testsInit
 	Else If ActiveView = "archive" Then
 		archiveInit
 	End If
@@ -1319,18 +1368,264 @@ Sub testsInit
 	ACToolBarLight1.SubTitle = "Классические опросники"
 	MainPanel.LoadLayout("tests")
 	testsLabelQuestion.Text = "Выберите тест:"
+	
 	session = DateTime.Now
 	
-	testsCurrent = "main"
-	testsCustomListView.AddTextItem("Шкала тревоги Спилбергера-Ханина", "STAIN")
+	testresult.Initialize
+	questions.Initialize
 	
+	testCurrent = "main"
+	
+	testsCustomListView.AddTextItem("СМИЛ", "smil")
+	testsCustomListView.AddTextItem("Данные анамнеза", "anamnesis")
+	testsCustomListView.AddTextItem("AUDIT", "audit")
+	testsCustomListView.AddTextItem("CAGE", "cage")
+	testsCustomListView.AddTextItem("Копинг-тест", "coping")
+	testsCustomListView.AddTextItem("Шкала тревоги Спилбергера-Ханина", "stai")
+	testsCustomListView.AddTextItem("Тест склонности к риску Шуберта", "schubert")
+	testsCustomListView.AddTextItem("Опросник Басса-Дарки", "buss.durkey")
+	testsCustomListView.AddTextItem("16-факторный опросник Р. Кеттела", "16pf")
+	testsCustomListView.AddTextItem("Опросник Мини-мульт", "mini.mult")
+	testsCustomListView.AddTextItem("Характерологический опросник Леонгарда", "leongard")
+	testsCustomListView.AddTextItem("Личностный опросник Г. Айзенка", "eysenck")
+	
+	testi = 1
 End Sub
 
-
 Sub testsCustomListView_ItemClick (Index As Int, Value As Object)
-	If Value = "STAIN" Then
-		testsCurrent = "STAIN"
-		Log(Value)
+	Dim su As StringUtils
+	
+	MainPanel.RemoveAllViews	
+	MainPanel.LoadLayout("test")
+	testLabelname.Text = name
+	
+	If Value = "anamnesis" Then
+		questions = su.LoadCSV(File.DirAssets, "anamnesis.csv", ";")
+		testCurrent = "anamnesis"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Сбор данных анамнеза"
+	else If Value = "audit" Then
+		questions = su.LoadCSV(File.DirAssets, "audit.csv", ";")
+		testCurrent = "audit"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "AUDIT"
+	else If Value = "cage" Then
+		questions = su.LoadCSV(File.DirAssets, "cage.csv", ";")
+		testCurrent = "cage"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "CAGE"
+	else If Value = "coping" Then
+		questions = su.LoadCSV(File.DirAssets, "coping.csv", ";")
+		testCurrent = "coping"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Копинг-тест"
+	else If Value = "stai" Then
+		questions = su.LoadCSV(File.DirAssets, "stai.csv", ";")
+		testCurrent = "stai"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Шкала тревоги Спилбергера-Ханина"
+	Else if Value = "schubert" Then
+		questions = su.LoadCSV(File.DirAssets, "schubert.csv", ";")
+		testCurrent = "schubert"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Тест склонности к риску Шуберта"
+	Else if Value = "buss.durkey" Then
+		questions = su.LoadCSV(File.DirAssets, "buss.durkey.csv", ";")
+		testCurrent = "buss.durkey"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Опросник Басса-Дарки"
+	Else if Value = "16pf" Then
+		questions = su.LoadCSV(File.DirAssets, "16pf.csv", ";")
+		testCurrent = "16pf"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "16-факторный опросник Р. Кеттела"
+	Else if Value = "mini.mult" Then
+		questions = su.LoadCSV(File.DirAssets, "mini.mult.csv", ";")
+		testCurrent = "mini.mult"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Опросник Мини-мульт"
+	Else if Value = "leongard" Then
+		questions = su.LoadCSV(File.DirAssets, "leongard.csv", ";")
+		testCurrent = "leongard"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Характерологический опросник Леонгарда"
+	Else if Value = "eysenck" Then
+		questions = su.LoadCSV(File.DirAssets, "eysenck.csv", ";")
+		testCurrent = "eysenck"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "Личностный опросник Г. Айзенка"
+	Else if Value = "smil" Then
+		If sex = "муж" Then
+			questions = su.LoadCSV(File.DirAssets, "smil.m.csv", ";")
+			testCurrent = "smil.m"
+			ACToolBarLight1.Title = "Классические опросники"
+			ACToolBarLight1.SubTitle = "СМИЛ (мужской)"
+		else if sex = "жен" Then
+			questions = su.LoadCSV(File.DirAssets, "smil.f.csv", ";")
+			testCurrent = "smil.f"
+			ACToolBarLight1.Title = "Классические опросники"
+			ACToolBarLight1.SubTitle = "СМИЛ (женский)"
+		End If
+	End If
+	
+	dotest(questions, testi)
+End Sub
+
+Sub dotest(q As List, qi As Int)
+	Dim question() As String
+	testtime = DateTime.Now
+	qi = qi - 1
+
+	If qi < q.Size Then
+		question = q.Get(qi)
+		testButton2.Enabled = False
+		testButton3.Enabled = False
+		testButton4.Enabled = False
+		testButton5.Enabled = False
+
+		testLabel.Text = question(0) & ". " & question(1)
+		testButton1.Text = question(2)
+		Log(question.Length)
+		
+		If question.Length = 4 Then
+			testButton2.Text = question(3)
+			If question(3) <> "" Then
+				testButton2.Enabled = True
+			End If
+		End If
+		If question.Length = 5 Then
+			testButton2.Text = question(3)
+			testButton3.Text = question(4)
+			If question(3) <> "" Then
+				testButton2.Enabled = True
+			End If
+			If question(4) <> "" Then
+				testButton3.Enabled = True
+			End If
+		End If
+		If question.Length = 6 Then
+			testButton2.Text = question(3)
+			testButton3.Text = question(4)
+			testButton4.Text = question(5)
+			If question(3) <> "" Then
+				testButton2.Enabled = True
+			End If
+			If question(4) <> "" Then
+				testButton3.Enabled = True
+			End If
+			If question(5) <> "" Then
+				testButton4.Enabled = True
+			End If
+		End If
+		If question.Length = 7 Then
+			testButton2.Text = question(3)
+			testButton3.Text = question(4)
+			testButton4.Text = question(5)
+			testButton5.Text = question(6)
+			If question(3) <> "" Then
+				testButton2.Enabled = True
+			End If
+			If question(4) <> "" Then
+				testButton3.Enabled = True
+			End If
+			If question(5) <> "" Then
+				testButton4.Enabled = True
+			End If
+			If question(6) <> "" Then
+				testButton5.Enabled = True
+			End If
+		End If
+	Else
+		Msgbox("Исследование окончено, спасибо!","")
+		testWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/" & testCurrent & "." & session & ".csv",True))
+		testWriter.WriteList(testresult)
+		testWriter.Close
+		testresult.Clear
+					
+		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & testCurrent & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.Close
+		
+		MainPanel.RemoveAllViews
+		testsInit
+		testButton1.Enabled = True
+		testButton2.Enabled = True
+		testButton3.Enabled = True
+		testButton4.Enabled = True
+		testButton5.Enabled = True
+	End If
+End Sub
+
+Sub testbutton1_click
+	If testButton1.Text = "Введите ответ" Then
+		questionrequester
+	Else
+		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton1.Text)
+		Log(testresult.Get(testi-1))
+		testi = testi + 1
+		dotest(questions, testi)
+	End If
+End Sub
+
+Sub testbutton2_click
+	If testButton2.Text = "Введите ответ" Then
+		questionrequester
+	Else
+		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton2.Text)
+		Log(testresult.Get(testi-1))
+		testi = testi + 1
+		dotest(questions, testi)
+	End If
+End Sub
+
+Sub testbutton3_click
+	If testButton3.Text = "Введите ответ" Then
+		questionrequester
+	Else
+		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton3.Text)
+		Log(testresult.Get(testi-1))
+		testi = testi + 1
+		dotest(questions, testi)
+	End If
+End Sub
+
+Sub testbutton4_click
+	If testButton4.Text = "Введите ответ" Then
+		questionrequester
+	Else
+		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton4.Text)
+		Log(testresult.Get(testi-1))
+		testi = testi + 1
+		dotest(questions, testi)
+	End If
+End Sub
+
+Sub testbutton5_click
+	If testButton5.Text = "Введите ответ" Then
+		questionrequester
+	Else
+		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton5.Text)
+		Log(testresult.Get(testi-1))
+		testi = testi + 1
+		dotest(questions, testi)
+	End If
+End Sub
+
+Sub questionrequester
+	Dim sf As Object = questionPicker.ShowAsync("Укажите нужный ответ", "ОК", "Отмена", "", Null, True)
+	questionPicker.SetSize(100%x, 400dip)
+	Wait For (sf) Dialog_Ready(pnl As Panel)
+	pnl.LoadLayout("questionrequester")
+	Wait For (sf) Dialog_Result (Result As Int)
+	If Result = DialogResponse.POSITIVE Then
+		If True Then 'questionrequesterEditText.Text <> "" Then СДЕЛАТЬ ЖЕСТКОЕ УСЛОВИЕ ПОСЛЕ ВЫПУСКА В ПРОД???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+			testresult.Add(testtime & ";" & name & ";" & testi & ";" & questionrequesterEditText.Text)
+			Log(testresult.Get(testi-1))
+			testi = testi + 1
+			dotest(questions, testi)
+		Else
+			Msgbox("Введите ответ","Ошибка! Пустое поле")
+		End If
 	End If
 End Sub
 
@@ -1347,23 +1642,22 @@ Sub archiveInit
 	For i = 0 To list.Size - 1
 		ArchiveCustomListView.AddTextItem(list.Get(i), 0)
 	Next
-'	ArchiveCustomListView.AddTextItem(& CRLF &)
 End Sub
 
 Sub ArchiveButtonSave_Click
 	Dim arc As Archiver
 	
+	archiveClearData
+	
 	If File.ListFiles(File.DirInternal & "/data").Size > 0 Then
-		arc.ASyncZipFolder(File.DirInternal & "/data", File.DirInternal & "/out", "archive.zip", "arc")
+		FileToSend = "archive." & DateTime.Now & ".zip"
+		arc.ASyncZipFolder(File.DirInternal & "/data", Starter.Provider.SharedFolder, FileToSend, "arc")
 	Else
 		Msgbox("А что архивировать собрались, если результатов нет?","Ошибка!")
 	End If
 End Sub
 
 Sub arc_ZipDone(CompletedWithoutError As Boolean, NbOfFiles As Int)
-	Dim FileToSend As String = "archive." & DateTime.Now & ".zip"
-	File.Copy(File.DirInternal & "/out", "archive.zip", Starter.Provider.SharedFolder, FileToSend)
-	
 	Dim in As Intent
 	in.Initialize(in.ACTION_SEND, "")
 	in.SetType("text/plain")
@@ -1371,6 +1665,64 @@ Sub arc_ZipDone(CompletedWithoutError As Boolean, NbOfFiles As Int)
 	in.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
 	StartActivity(in)
 End Sub
+
+Sub ArchiveButtonClearResults_Click
+	Dim list As List
+	Dim ans As Int
+	
+	list = File.ListFiles(File.DirInternal & "/data")
+	If list.Size > 0 Then
+		ans = Msgbox2("Удалить все результаты?", "Очистка данных", "Да", "", "Нет", Null)
+		If ans = DialogResponse.POSITIVE Then
+			For i = 0 To list.Size - 1
+				File.Delete(File.DirInternal & "/data", list.Get(i))
+			Next
+			archiveInit
+		End If
+	Else
+		Msgbox("А что стирать собрались, если результатов нет?","Ошибка!")
+	End If
+End Sub
+
+Sub ArchiveCustomListView_ItemClick (Index As Int, Value As Object)
+	Log(Index & " : " & Value)
+
+	Dim r As List
+	Dim x As id
+		
+	r.Initialize
+	r.AddAll(Array As String("Отправить", "Удалить"))
+   	Dim m As Int = x.InputList1(r, "Выберите действие")
+	
+	If m = 0 Then
+		FileToSend = ArchiveCustomListView.GetPanel(Index).GetView(0).Text
+		File.Copy(File.DirInternal & "/data", FileToSend, Starter.Provider.SharedFolder, FileToSend)
+				
+		Dim in As Intent
+		in.Initialize(in.ACTION_SEND, "")
+		in.SetType("text/plain")
+		in.PutExtra("android.intent.extra.STREAM", Starter.Provider.GetFileUri(FileToSend))
+		in.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
+		StartActivity(in)
+	else if m = 1 Then
+		File.Delete(File.DirInternal & "/data", ArchiveCustomListView.GetPanel(Index).GetView(0).Text)
+		archiveInit
+	End If
+End Sub
+
+Sub archiveClearData
+	Dim list As List
+	
+	list = File.ListFiles(Starter.Provider.SharedFolder)
+	If list.Size > 0 Then
+		For i = 0 To list.Size - 1
+			File.Delete(Starter.Provider.SharedFolder, list.Get(i))
+		Next
+	End If
+End Sub
+
+
+
 
 
 
