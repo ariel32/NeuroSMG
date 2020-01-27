@@ -149,6 +149,8 @@ Sub Process_Globals
 	Dim GNGsubtestTimer As Timer
 	Dim GNGcleanTimer As Timer
 	Dim SCTTimer As Timer
+	Dim CBTtimer As Timer
+	Dim CBTtimerContinue As Timer
 	
 	Dim name As String
 	Dim age As String
@@ -290,8 +292,13 @@ Sub Globals
 	Dim TMTresult As List
 	
 	'''''''''''''''''''''' CBT
-	Dim CBTn = 1 As Int
-	Dim CBTstart As String
+	Dim CBTn As Int
+	Dim CBTi = 0 As Int
+	Dim CBTmax As Int
+	Dim CBTcurrent = 1 As Int
+	Dim CBTstarted As Boolean
+	Dim CBTstart As Long
+	Dim CBTblocksize As Int
 	
 	Dim CBTCanvas As Canvas
 	Dim CBTCanvasInvis As Canvas
@@ -299,7 +306,8 @@ Sub Globals
 	Dim CBTLabelN As Label
 	Dim CBTpanel As Panel
 	Dim CBTpanelInv As Panel
-	
+		
+	Dim CBTrnd As Map
 	Dim CBTWriter As TextWriter
 	Dim CBTresult As List
 	Dim coords As List
@@ -1654,26 +1662,38 @@ End Sub
 Sub CBTInit
 	ACToolBarLight1.Title = "CBT"
 	ACToolBarLight1.SubTitle = "Corsi block test"
+	MainPanel.RemoveAllViews
 	MainPanel.LoadLayout("CBT")
+	
+	CBTtimer.Initialize("CBTtimer", 1000)
+	CBTtimer.Enabled = False
+	CBTtimerContinue.Initialize("CBTtimerContinue", 1500)
+	CBTtimerContinue.Enabled = False
+	
+	CBTrnd.Initialize
 
 	CBTCanvas.Initialize(CBTpanel)
 	CBTCanvasInvis.Initialize(CBTpanelInv)
 	
+	CBTi = 0
+	CBTn = 1
+	CBTmax = 3
+	CBTcurrent = 1
+	CBTstarted = False
+
 	CBTLabelName.Text = name
 	CBTLabelN.Text = "Шаг " & CBTn & "/20"
 	
 	session = DateTime.Now
-	
-	CBTstart = ""
-	
+		
 	CBTresult.Initialize : CBTresult.Clear
 	
 	coords.Initialize : coords.Clear
 	
-	Dim CBTblocksize = 60 As Int
+	CBTblocksize = CBTCanvas.Bitmap.Width/6
 	
-	For x = CBTblocksize To CBTCanvas.Bitmap.Width-CBTblocksize Step Round((CBTCanvas.Bitmap.Width-CBTblocksize)/10)
-		For y = CBTblocksize To CBTCanvas.Bitmap.Height-CBTblocksize Step Round((CBTCanvas.Bitmap.Height-CBTblocksize)/10)
+	For x = CBTblocksize To CBTCanvas.Bitmap.Width-CBTblocksize Step Round((CBTCanvas.Bitmap.Width-CBTblocksize)/4)
+		For y = CBTblocksize To CBTCanvas.Bitmap.Height-CBTblocksize Step Round((CBTCanvas.Bitmap.Height-CBTblocksize)/6)
 			Dim tmp As coordinates
 			tmp.x = x
 			tmp.y = y
@@ -1687,18 +1707,122 @@ Sub CBTform
 	CBTCanvasInvis.DrawColor(Colors.Transparent)
 	CBTLabelN.Text = "Шаг " & CBTn & "/20"
 
-	Dim CBTrnd As Map
-
 	CBTrnd = CBTShuffle(10, 0, coords.Size-1)
-	CBTDraw(CBTrnd, Colors.Blue, 9)
+	Dim CBTblock As Rect
+	Dim CBTtmp As coordinates
+
+	For i = 0 To 9
+		CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+		CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+		CBTCanvasInvis.DrawRect(CBTblock, Colors.Blue, True, 1dip)
+		Activity.Invalidate
+	Next
 	CBTn = CBTn + 1
 End Sub
 
 Sub CBTpanel_touch(Action As Int, tx As Float, ty As Float)
 	Select Action
-		Case MainPanel.ACTION_DOWN
-			CBTform
+		Case MainPanel.ACTION_UP
+			If CBTstarted = False Then
+				If Msgbox2("Длина последовательности - " & CBTmax, "Corsi block test", "Да", "", "Нет", Null) = DialogResponse.POSITIVE Then
+					CBTform : CBTstarted = True : CBTtimer.Enabled = True
+				End If
+			End If
+			Dim CBTtarget = CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1-1 As Int
+			If CBTstarted = True And CBTtimer.Enabled = False And CBTtarget >= 0 And CBTtarget <= 9 Then
+				If CBTcurrent <= CBTmax Then
+					CBTresult.Add((CBTn-1) & ";" & (DateTime.Now - CBTstart) & ";" & (CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1))
+					CBTstart = DateTime.Now
+					Dim CBTblock As Rect
+					Dim CBTtmp As coordinates
+					CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTtarget))
+					CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+					CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
+					Activity.Invalidate
+					
+					If CBTcurrent = CBTmax Then
+						CBTDraw(CBTrnd, Colors.Gray, 9)
+						CBTtimerContinue.Enabled = True
+					End If
+					
+					CBTcurrent = CBTcurrent + 1
+				Else
+					
+				End If
+			End If
 	End Select
+End Sub
+
+Sub CBTtimer_tick
+	Dim CBTblock As Rect
+	Dim CBTtmp As coordinates
+	If CBTi <= CBTmax - 1 Then
+		For i = 0 To 9
+			CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+			CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+			CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+			CBTCanvasInvis.DrawRect(CBTblock, i*-1-1, True, 1dip)
+			Activity.Invalidate
+		Next
+
+		CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTi))
+		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+		CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
+		Activity.Invalidate
+		CBTstart = DateTime.Now+1000
+		CBTi = CBTi + 1
+	Else
+		For i = 0 To 9
+			CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+			CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+			CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+			Activity.Invalidate
+		Next
+		CBTtimer.Enabled = False
+	End If
+End Sub
+
+Sub CBTtimerContinue_tick
+	CBTform : CBTstarted = True : CBTtimer.Enabled = True
+	CBTcurrent = 1 : CBTi = 0
+	CBTtimerContinue.Enabled = False
+	If CBTn = 12 Then
+		CBTmax = CBTmax + 1
+		Msgbox("Длина последовательности - " & CBTmax, "Corsi block test")
+'	Else If CBTn = 11 Then
+'		CBTmax = CBTmax + 1
+'		Msgbox("Длина последовательности - " & CBTmax, "Corsi block test")
+	Else If CBTn = 17 Then
+		CBTmax = CBTmax + 1
+		Msgbox("Длина последовательности - " & CBTmax, "Corsi block test")
+	Else If CBTn = 22 Then
+		Msgbox("Исследование завершено!", "Corsi block test")
+				
+		CBTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/CBT."& session & ".csv",True))
+		CBTWriter.WriteList(CBTresult)
+		CBTWriter.Close
+		CBTresult.Clear
+		
+		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+		RESWriter.WriteLine(session & ";" & group & ";" & "CBT" & ";" & name & ";" & comment)
+		RESWriter.Close
+		
+		CBTInit
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/CBT."& session & ".csv", True)
+	End If
+End Sub
+
+Sub CBTDraw(CBTr As Map, Color As Int, i As Int)
+	Dim CBTblock As Rect
+	Dim CBTtmp As coordinates
+
+	For i = 0 To i
+		CBTtmp = coords.Get(CBTr.GetKeyAt(i))
+		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+		CBTCanvas.DrawRect(CBTblock, Color, True, 1dip)
+		Activity.Invalidate
+	Next
 End Sub
 
 Sub CBTShuffle (NumbersToCreate As Int, MinNumber As Int, MaxNumber As Int) As Map
@@ -1711,19 +1835,6 @@ Sub CBTShuffle (NumbersToCreate As Int, MinNumber As Int, MaxNumber As Int) As M
     
 	Return (NumbersMap)
 End Sub
-
-Sub CBTDraw(CBTrnd As Map, Color As Int, i As Int)
-	Dim CBTblock As Rect
-	Dim CBTtmp As coordinates
-
-	For i = 0 To i
-		CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
-		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + 60, CBTtmp.y + 60)
-		CBTCanvas.DrawRect(CBTblock, Color, True, 1dip)
-		Activity.Invalidate
-	Next
-End Sub
-
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''                     tests                     '''''''''''''''''''''''''''''''''''''''''''''''''''
