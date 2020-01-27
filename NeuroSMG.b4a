@@ -1,30 +1,32 @@
 ﻿Build1=Default,NeuroSMG.app
 File1=16pf.csv
-File10=GNG.bal
-File11=hamburger.png
-File12=IAT.bal
-File13=Left.bal
-File14=leongard.csv
-File15=login.bal
-File16=main.bal
-File17=mini.mult.csv
-File18=questionrequester.bal
-File19=RAT.bal
+File10=FOT.bal
+File11=GNG.bal
+File12=hamburger.png
+File13=IAT.bal
+File14=Left.bal
+File15=leongard.csv
+File16=login.bal
+File17=main.bal
+File18=mini.mult.csv
+File19=questionrequester.bal
 File2=anamnesis.csv
-File20=schubert.csv
-File21=SCT.bal
-File22=smil.f.csv
-File23=smil.m.csv
-File24=stai.csv
-File25=test.bal
-File26=tests.bal
+File20=RAT.bal
+File21=schubert.csv
+File22=SCT.bal
+File23=smil.f.csv
+File24=smil.m.csv
+File25=stai.csv
+File26=test.bal
+File27=tests.bal
+File28=TMT.bal
 File3=archive.bal
 File4=audit.csv
 File5=buss.durkey.csv
 File6=cage.csv
-File7=coping.csv
-File8=eysenck.csv
-File9=FOT.bal
+File7=CBT.bal
+File8=coping.csv
+File9=eysenck.csv
 FileGroup1=Default Group
 FileGroup10=Default Group
 FileGroup11=Default Group
@@ -44,6 +46,8 @@ FileGroup23=Default Group
 FileGroup24=Default Group
 FileGroup25=Default Group
 FileGroup26=Default Group
+FileGroup27=Default Group
+FileGroup28=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
 FileGroup5=Default Group
@@ -72,7 +76,7 @@ Module3=FileProvider
 Module4=CustomListView
 Module5=StateManager
 Module6=test
-NumberOfFiles=26
+NumberOfFiles=28
 NumberOfLibraries=12
 NumberOfModules=6
 Version=9.01
@@ -153,6 +157,8 @@ Sub Process_Globals
 	Dim session As Long
 	Dim comment As String
 	Dim group As String
+	
+	Type coordinates(x As Int, y As Int)
 End Sub
 
 Sub Globals
@@ -265,6 +271,39 @@ Sub Globals
 	Dim SCTWriter As TextWriter
 	Dim SCTresult As List
 	
+	'''''''''''''''''''''' TMT
+	Dim MAZE_DISPLAY As Canvas
+	Dim MAZE_INVIS As Canvas
+	Dim mc As Int
+	Dim MAZE_SIZE_H, MAZE_SIZE_V As Int
+	Dim MAZE(1, 1) As Int
+	
+	Dim TMTn = 1 As Int
+	Dim TMTstart As String
+	
+	Dim TMTLabelName As Label
+	Dim TMTLabelN As Label
+	Dim TMTpanel As Panel
+	Dim TMTpanelInv As Panel
+	
+	Dim TMTWriter As TextWriter
+	Dim TMTresult As List
+	
+	'''''''''''''''''''''' CBT
+	Dim CBTn = 1 As Int
+	Dim CBTstart As String
+	
+	Dim CBTCanvas As Canvas
+	Dim CBTCanvasInvis As Canvas
+	Dim CBTLabelName As Label
+	Dim CBTLabelN As Label
+	Dim CBTpanel As Panel
+	Dim CBTpanelInv As Panel
+	
+	Dim CBTWriter As TextWriter
+	Dim CBTresult As List
+	Dim coords As List
+	
 	'''''''''''''''''''''' tests
 	Dim testi As Int
 	Dim testtime As Long
@@ -309,6 +348,8 @@ Sub Activity_Create(FirstTime As Boolean)
 	ListViewLeft.AddSingleLine("IAT")
 	ListViewLeft.AddSingleLine("GNG")
 	ListViewLeft.AddSingleLine("SCT")
+	ListViewLeft.AddSingleLine("TMT")
+	ListViewLeft.AddSingleLine("CBT")
 	ListViewLeft.AddSingleLine("Тесты")
 	ListViewLeft.AddSingleLine("Архив")
 	ListViewLeft.AddSingleLine("О программе")
@@ -384,6 +425,10 @@ Sub Activity_Resume
 		GNGInit
 	Else If ActiveView = "SCT" Then
 		SCTInit
+	Else If ActiveView = "TMT" Then
+		TMTInit
+	Else If ActiveView = "CBT" Then
+		CBTInit
 	Else If ActiveView = "tests" Then
 		testsInit
 	Else If ActiveView = "archive" Then
@@ -429,6 +474,14 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 		ActiveView = "SCT"
 		p.SetScreenOrientation(1)
 		SCTInit
+	Else If Value = "TMT" Then
+		ActiveView = "TMT"
+		p.SetScreenOrientation(0)
+		TMTInit
+	Else If Value = "CBT" Then
+		ActiveView = "CBT"
+		p.SetScreenOrientation(1)
+		CBTInit
 	Else If Value = "Тесты" Then
 		ActiveView = "tests"
 		p.SetScreenOrientation(1)
@@ -1357,6 +1410,318 @@ Sub SCTLabelPanel_Click
 		Msgbox("Внимание!", "Исследование начато")
 		SCTTimer.Enabled = True
 	End If
+End Sub
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''                      TMT                      '''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Sub TMTInit
+	ACToolBarLight1.Title = "TMT"
+	ACToolBarLight1.SubTitle = "Trail making test"
+	MainPanel.LoadLayout("TMT")
+	
+	TMTLabelName.Text = name
+	TMTLabelN.Text = "Шаг " & TMTn & "/20"
+	
+	session = DateTime.Now
+	
+	TMTstart = ""
+	
+	TMTresult.Initialize
+	TMTresult.Clear
+	
+	mc = GetDeviceLayoutValues.Height * 0.10
+	MAZE_DISPLAY.Initialize(TMTpanel)
+	MAZE_INVIS.Initialize(TMTpanelInv)
+	
+	MAZE_SIZE_H = 12
+	MAZE_SIZE_V = 6
+	
+	If MAZE_SIZE_H Mod 2 = 0 Then
+		MAZE_SIZE_H = MAZE_SIZE_H + 1
+	End If
+	If MAZE_SIZE_V Mod 2 = 0 Then
+		MAZE_SIZE_V = MAZE_SIZE_V + 1
+	End If
+	
+	Dim MAZE(MAZE_SIZE_V, MAZE_SIZE_H) As Int
+		
+	MAZE_CREATE : SHOW_MAZE
+End Sub
+
+Sub MAZE_CREATE
+	Dim LIG, COLON As Int
+	Dim LIG2, COLON2 As Int
+	Dim TAB_PILE( 3, (MAZE_SIZE_H*MAZE_SIZE_V)/2 ) As Int
+	Dim PILE As Int
+	
+	' Clean area
+	' Value 2 = corridor. Will be then replaced by 0
+	For LIG = 0 To MAZE_SIZE_V -1
+		For COLON = 0 To MAZE_SIZE_H -1
+			MAZE( LIG, COLON) = 2
+		Next
+	Next
+
+	' cross
+	For COLON = 0 To MAZE_SIZE_H -1 Step 2
+		For LIG = 0 To MAZE_SIZE_V -1
+			MAZE( LIG, COLON ) = 1								' 1 = wall
+		Next
+	Next
+	For LIG = 0 To MAZE_SIZE_V -1 Step 2
+		For COLON = 0 To MAZE_SIZE_H -1
+			MAZE( LIG, COLON ) = 1
+		Next
+	Next
+	
+	' Step 1 : create random  maze
+	For LIG = 1 To MAZE_SIZE_V -3  Step 2
+		For COLON = 1 To MAZE_SIZE_H -3 Step 2
+			If Rnd( 0,2 ) = 0 Then
+				MAZE( LIG, COLON+1 ) = 2                                 ' door on right
+			Else
+				MAZE( LIG+1, COLON ) = 2                                 ' door below
+			End If
+		Next
+	Next
+	
+	' Step 2 : Make the maze faisable
+	' doing a "fill" an opening not accessible part of the maze
+	PILE = 1
+	TAB_PILE( 1, 0 ) = 1                                             ' column
+	TAB_PILE( 2, 0 ) = 1                                             ' Line
+	'PILE = PILE +1
+	Do While PILE > 0
+	
+		Do While PILE > 0
+			PILE = PILE - 1
+			COLON = TAB_PILE( 1, PILE )                                   ' read column in the stack
+			LIG = TAB_PILE( 2, PILE )                                     ' read line in the stack
+			MAZE( LIG, COLON ) = 0											' 0 = make that coordonate as an accessible corridor
+			If MAZE( LIG-1, COLON ) = 2 Then                              ' if opened above
+				TAB_PILE( 1, PILE ) = COLON                                 ' mémorise column
+				TAB_PILE( 2, PILE ) = LIG-1                                 ' mémorise line -1
+				PILE = PILE +1
+			End If
+			If MAZE( LIG, COLON+1 ) = 2 Then                              ' si opened on right
+				TAB_PILE( 1, PILE ) = COLON+1
+				TAB_PILE( 2, PILE ) = LIG
+				PILE = PILE +1
+			End If
+			If MAZE( LIG+1, COLON ) = 2 Then                              ' si opened below
+				TAB_PILE( 1, PILE ) = COLON
+				TAB_PILE( 2, PILE ) = LIG+1
+				PILE = PILE +1
+			End If
+			If MAZE( LIG, COLON-1 ) = 2 Then                              ' si opened on left
+				TAB_PILE( 1, PILE ) = COLON-1
+				TAB_PILE( 2, PILE ) = LIG
+				PILE = PILE +1
+			End If
+		  
+		Loop
+		' The stack is empty
+		' Looking for not accessible part of the maze (value = 2)
+		For LIG2 = 1 To MAZE_SIZE_V -1  Step 2
+			For COLON2 = 1 To MAZE_SIZE_H -1 Step 2
+			
+				If MAZE( LIG2, COLON2 ) = 2 Then								' found a part of the maze not accessible
+
+					If LIG2 = 1 Then                                           ' we are on the first line ?
+						If COLON2 = 1 Then                                       ' We are on the first column too ?
+							MAZE( LIG2, COLON2+1 ) = 0                             'create a door on right
+						Else
+							MAZE( LIG2, COLON2-1 ) = 0                            'create a door on left
+						End If
+						
+					Else															' no longer on the first line
+					
+						If COLON2 = 1 Then                                       ' ... But on the first column
+							MAZE( LIG2 -1, COLON2 ) = 0                          'create a door on right
+						Else														' no longer on the first column
+							If Rnd( 0, 2 ) = 1 And MAZE( LIG2, COLON2 -1 ) = 1 Then ' create door on left if there is a wall
+								MAZE( LIG2, COLON2 -1 ) = 0
+							Else
+								MAZE( LIG2-1, COLON2 ) = 0                              'create door above
+							End If
+						End If
+					End If
+					TAB_PILE( 1, PILE ) = COLON2
+					TAB_PILE( 2, PILE ) = LIG2
+					PILE = PILE + 1
+					COLON2 = MAZE_SIZE_H
+					LIG2 = MAZE_SIZE_V
+				End If
+			Next
+		Next
+		
+	Loop
+
+	' Create entrance and exit
+	' create door on left
+	LIG = Rnd( 1,MAZE_SIZE_V - 3 )                            			' between 1 and bottom
+	If MAZE( LIG, 1 ) = 0 Then                                         	' If there is no wall after the door
+		MAZE( LIG, 0 ) = 0												' create the door
+	Else
+		MAZE( LIG + 1,0 ) = 0											' create the door above the random coordonates
+	End If
+	' create door on right
+	LIG = Rnd( 1, MAZE_SIZE_V -3 )
+	If MAZE( LIG, MAZE_SIZE_H -2 ) = 0 Then
+		MAZE( LIG, MAZE_SIZE_H - 1 ) = 0
+	Else
+		MAZE( LIG +1, MAZE_SIZE_H -1 ) = 0
+	End If
+
+
+End Sub
+
+Sub SHOW_MAZE
+	Dim LIG, COLON As Int
+	Dim BLOCK As Rect
+	
+	Dim va = GetDeviceLayoutValues.Width/2 As Int
+	Dim ha = GetDeviceLayoutValues.Height/2 As Int
+	va = va - mc*MAZE_SIZE_H/2
+	ha = ha - mc*MAZE_SIZE_V/2-30
+	
+	BLOCK.Initialize( 0+va, 0+ha, MAZE_SIZE_H*mc+va, MAZE_SIZE_V*mc+ha )
+	MAZE_DISPLAY.DrawRect( BLOCK, Colors.LightGray, True, 1dip )
+	MAZE_INVIS.DrawRect( BLOCK, Colors.Transparent, True, 1dip )
+	Activity.Invalidate
+		
+	For LIG = 0 To MAZE_SIZE_V -1
+		For COLON = 0 To MAZE_SIZE_H -1
+			If MAZE( LIG, COLON ) = 1 Then
+				BLOCK.Initialize( COLON*mc+va, LIG*mc+ha, (COLON*mc)+mc+va, (LIG*mc)+mc +ha)
+				MAZE_DISPLAY.DrawRect( BLOCK, Colors.DarkGray, True, 1dip)
+				MAZE_INVIS.DrawRect( BLOCK, Colors.DarkGray, True, 1dip)
+				Activity.Invalidate
+			End If
+		Next
+	Next
+
+
+
+End Sub
+
+Sub TMTpanel_touch(Action As Int, tx As Float, ty As Float)
+	Select Action
+		Case MainPanel.ACTION_DOWN
+			If TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx > GetDeviceLayoutValues.Width/2 Then
+				TMTstart = "right"
+			else if TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx < GetDeviceLayoutValues.Width/2 Then
+				TMTstart = "left"
+			End If
+		Case MainPanel.ACTION_MOVE
+			'Log(MAZE_INVIS.Bitmap.GetPixel(tx, ty))
+			If TMTstart <> "" Then
+				MAZE_DISPLAY.DrawCircle(tx, ty, 10dip, Colors.Green, True, 1Dip)
+				Activity.Invalidate3(tx - 10dip, ty - 10dip, tx + 10dip, ty + 10dip)
+				
+				TMTresult.Add(DateTime.Now & ";" & TMTn & ";" & (tx/GetDeviceLayoutValues.Width) & ";" & (ty/GetDeviceLayoutValues.Height) & ";" & MAZE_INVIS.Bitmap.GetPixel(tx, ty))
+			End If
+		Case MainPanel.ACTION_UP
+			If (TMTstart = "left" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx > GetDeviceLayoutValues.Width/2) Or (TMTstart = "right" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx < GetDeviceLayoutValues.Width/2) Then
+				TMTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/TMT."& session & ".csv",True))
+				TMTWriter.WriteList(TMTresult)
+				TMTWriter.Close
+				TMTresult.Clear
+				
+				TMTn = TMTn + 1 : TMTstart = "" : MainPanel.RemoveAllViews : MainPanel.LoadLayout("TMT") : MAZE_DISPLAY.Initialize(TMTpanel) : MAZE_INVIS.Initialize(TMTpanelInv) : MAZE_CREATE : SHOW_MAZE : TMTLabelN.Text = "Шаг " & TMTn & "/20"
+				TMTLabelName.Text = name
+			End If
+	End Select
+		
+	If TMTn = 21 Then
+		Msgbox("Исследование окончено, спасибо!","")
+
+		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
+		RESWriter.WriteLine(session & ";" & group & ";" & "TMT" & ";" & name & ";" & comment)
+		RESWriter.Close
+
+		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/TMT."& session & ".csv", True)
+		TMTn = 1
+		TMTInit
+	End If
+End Sub
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''                      CBT                      '''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Sub CBTInit
+	ACToolBarLight1.Title = "CBT"
+	ACToolBarLight1.SubTitle = "Corsi block test"
+	MainPanel.LoadLayout("CBT")
+
+	CBTCanvas.Initialize(CBTpanel)
+	CBTCanvasInvis.Initialize(CBTpanelInv)
+	
+	CBTLabelName.Text = name
+	CBTLabelN.Text = "Шаг " & CBTn & "/20"
+	
+	session = DateTime.Now
+	
+	CBTstart = ""
+	
+	CBTresult.Initialize : CBTresult.Clear
+	
+	coords.Initialize : coords.Clear
+	
+	Dim CBTblocksize = 60 As Int
+	
+	For x = CBTblocksize To CBTCanvas.Bitmap.Width-CBTblocksize Step Round((CBTCanvas.Bitmap.Width-CBTblocksize)/10)
+		For y = CBTblocksize To CBTCanvas.Bitmap.Height-CBTblocksize Step Round((CBTCanvas.Bitmap.Height-CBTblocksize)/10)
+			Dim tmp As coordinates
+			tmp.x = x
+			tmp.y = y
+			coords.Add(tmp)
+		Next
+	Next
+End Sub
+
+Sub CBTform
+	CBTCanvas.DrawColor(Colors.Transparent)
+	CBTCanvasInvis.DrawColor(Colors.Transparent)
+	CBTLabelN.Text = "Шаг " & CBTn & "/20"
+
+	Dim CBTrnd As Map
+
+	CBTrnd = CBTShuffle(10, 0, coords.Size-1)
+	CBTDraw(CBTrnd, Colors.Blue, 9)
+	CBTn = CBTn + 1
+End Sub
+
+Sub CBTpanel_touch(Action As Int, tx As Float, ty As Float)
+	Select Action
+		Case MainPanel.ACTION_DOWN
+			CBTform
+	End Select
+End Sub
+
+Sub CBTShuffle (NumbersToCreate As Int, MinNumber As Int, MaxNumber As Int) As Map
+	Dim NumbersMap As Map
+	NumbersMap.Initialize
+        
+	Do Until NumbersMap.size=NumbersToCreate
+		NumbersMap.Put(Rnd(MinNumber,MaxNumber+1),Null)
+	Loop
+    
+	Return (NumbersMap)
+End Sub
+
+Sub CBTDraw(CBTrnd As Map, Color As Int, i As Int)
+	Dim CBTblock As Rect
+	Dim CBTtmp As coordinates
+
+	For i = 0 To i
+		CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + 60, CBTtmp.y + 60)
+		CBTCanvas.DrawRect(CBTblock, Color, True, 1dip)
+		Activity.Invalidate
+	Next
 End Sub
 
 
