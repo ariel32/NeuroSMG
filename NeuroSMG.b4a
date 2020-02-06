@@ -110,6 +110,13 @@ public boolean _onCreateOptionsMenu(android.view.Menu menu) {
 
 #IgnoreWarnings: 11
 
+'Sub Activity_WindowFocusChanged(HasFocus As Boolean)
+'	If HasFocus Then
+'		Dim jo As JavaObject = Activity
+'		jo.RunMethod("setSystemUiVisibility", Array As Object(5894)) '3846 - non-sticky
+'	End If
+'End Sub
+
 Sub Activity_CreateMenu(Menu As ACMenu)
 	Dim item As ACMenuItem
 	Dim ph As Phone
@@ -253,7 +260,7 @@ Sub Globals
 	Private IATLabelInfoLeft, IATLabelInfoRight, IATLabelInfoBottom, IATLabelInfo, IATLabelLeft, IATLabelRight, IATLabelInfoBottom, IATLabelName As Label
 	
 	'''''''''''''''''''''' GNG
-	Dim GNGLabel2, GNGLabel3, GNGLabel4, GNGLabel5 As Label
+	Dim GNGLabel1, GNGLabel2, GNGLabel3, GNGLabel4, GNGLabel5 As Label
 	Private GNGButtonStart As Button
 	Private GNGLabelName As Label
 	
@@ -358,7 +365,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	ListViewLeft.AddSingleLine("SCT")
 	ListViewLeft.AddSingleLine("TMT")
 	ListViewLeft.AddSingleLine("CBT")
-	ListViewLeft.AddSingleLine("Тесты")
+	ListViewLeft.AddSingleLine("Опросники")
 	ListViewLeft.AddSingleLine("Архив")
 	ListViewLeft.AddSingleLine("О программе")
 	
@@ -490,7 +497,7 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 		ActiveView = "CBT"
 		p.SetScreenOrientation(1)
 		CBTInit
-	Else If Value = "Тесты" Then
+	Else If Value = "Опросники" Then
 		ActiveView = "tests"
 		p.SetScreenOrientation(1)
 		testsInit
@@ -529,7 +536,8 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 			FOTx = tx / MainPanel.Width
 			FOTy = ty / MainPanel.Height
 		
-			FOTcoords = session & ";" & name & "," & age & "," & sex & "," & dhand & ";" & FOTnow & ";" & FOTcurrentTime & ";" & FOTduration & ";" & FOTx & ";" & FOTy & ";" & FOThand
+			'FOTcoords = session & ";" & name & "," & age & "," & sex & "," & dhand & ";" & FOTnow & ";" & FOTcurrentTime & ";" & FOTduration & ";" & FOTx & ";" & FOTy & ";" & FOThand
+			FOTcoords = FOTnow & ";" & FOTcurrentTime & ";" & FOTduration & ";" & FOTx & ";" & FOTy & ";" & FOThand
 			Log(FOTcoords)
 			FOTresult.Add(FOTcoords)
 		
@@ -582,7 +590,8 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 				
 				If IATblock = 1 Then
 					If (IATmark = "soft" And IATside = "left") Or (IATmark = "alco" And IATside = "right") Then
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 						IATdoTest
@@ -590,13 +599,15 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					Else
 						IATLabelInfoBottom.Text = "НЕВЕРНО!"&CRLF&"Сделайте правильный выбор"
 						IATerror = True
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 					End If
 				Else If IATblock = 2 Then
 					If (IATmark = "good" And IATside = "left") Or (IATmark = "bad" And IATside = "right") Then
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 						IATdoTest
@@ -604,13 +615,15 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					Else
 						IATLabelInfoBottom.Text = "НЕВЕРНО!"&CRLF&"Сделайте правильный выбор"
 						IATerror = True
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 					End If
 				Else If IATblock = 3 Or IATblock = 4 Then
 					If (IATmark = "goodsoft" And IATside = "left") Or (IATmark = "badalco" And IATside = "right") Then
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 						IATdoTest
@@ -618,13 +631,15 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					Else
 						IATLabelInfoBottom.Text = "НЕВЕРНО!"&CRLF&"Сделайте правильный выбор"
 						IATerror = True
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 					End If
 				Else If IATblock = 5 Then
 					If (IATmark = "bad" And IATside = "left") Or (IATmark = "good" And IATside = "right") Then
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 						IATdoTest
@@ -632,13 +647,15 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					Else
 						IATLabelInfoBottom.Text = "НЕВЕРНО!"&CRLF&"Сделайте правильный выбор"
 						IATerror = True
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 					End If
 				Else If IATblock = 6 Or IATblock = 7 Then
 					If (IATmark = "badsoft" And IATside = "left") Or (IATmark = "goodalco" And IATside = "right") Then
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 						IATdoTest
@@ -646,7 +663,8 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 					Else
 						IATLabelInfoBottom.Text = "НЕВЕРНО!"&CRLF&"Сделайте правильный выбор"
 						IATerror = True
-						IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						'IATtmp = session&";"&name&";"&IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
+						IATtmp = IATtime&";"&IATblock&";"&IATn&";"&IATduration&";"&IATside&";"&IATi&";"&IATmark&";"&IATerror&";"&IATLabelInfo.Text
 						IATresult.Add(IATtmp)
 						Log(IATtmp)
 					End If
@@ -730,7 +748,8 @@ Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
 				If SCTstarted Then
 					SCTt = DateTime.Now
 					SCTduration = SCTt-SCTt0
-					SCTtmp = session&";"&name&";"&SCTt&";"&SCTduration&";"&SCTside&";"&SCTtText&";"&SCTtColor&";"&SCTn
+					'SCTtmp = session&";"&name&";"&SCTt&";"&SCTduration&";"&SCTside&";"&SCTtText&";"&SCTtColor&";"&SCTn
+					SCTtmp = SCTt&";"&SCTduration&";"&SCTside&";"&SCTtText&";"&SCTtColor&";"&SCTn
 					Log(SCTtmp)
 					SCTresult.Add(SCTtmp)
 					
@@ -1042,7 +1061,8 @@ Sub RATPump
 				MsgboxAsync("Попытка №" & RATE,"")
 			Else if RATE = 3 Then
 				Msgbox("Исследование окончено, спасибо!","")
-				RATresult.Add(session & ";" & RATtime & ";" & name & ";" & RATE & ";" & RATm & ";" & RATn & ";" & RATr & ";" & RATln & ";" & RATiter & ";" & RATciter & ";" & RATduration & ";" & RATmark & ";" & RATbank)
+				'RATresult.Add(session & ";" & RATtime & ";" & name & ";" & RATE & ";" & RATm & ";" & RATn & ";" & RATr & ";" & RATln & ";" & RATiter & ";" & RATciter & ";" & RATduration & ";" & RATmark & ";" & RATbank)
+				RATresult.Add(RATtime & ";" & RATE & ";" & RATm & ";" & RATn & ";" & RATr & ";" & RATln & ";" & RATiter & ";" & RATciter & ";" & RATduration & ";" & RATmark & ";" & RATbank)
 				RATWriter.Initialize(File.OpenOutput(File.DirInternal, "/data/RAT."& session & ".csv",True))
 				RATWriter.WriteList(RATresult)
 				RATWriter.Close
@@ -1066,7 +1086,8 @@ Sub RATPump
 						
 		RATl = "name: "&name&"m: "&RATm&", n: "&RATn&", r: "&RATr&", Шар: "&RATln&", Iter: "&RATiter&", Citer: "&RATciter&", bank: "&RATbank&", mark: "&RATmark&", E: "&RATE
 		Log(RATl)
-		RATresult.Add(session&";"&RATtime&";"&name&";"&RATE&";"&RATm&";"&RATn&";"&RATr&";"&RATln&";"&RATiter&";"&RATciter&";"&RATduration&";"&RATmark&";"&RATbank)
+		'RATresult.Add(session&";"&RATtime&";"&name&";"&RATE&";"&RATm&";"&RATn&";"&RATr&";"&RATln&";"&RATiter&";"&RATciter&";"&RATduration&";"&RATmark&";"&RATbank)
+		RATresult.Add(RATtime & ";" & RATE & ";" & RATm & ";" & RATn & ";" & RATr & ";" & RATln & ";" & RATiter & ";" & RATciter & ";" & RATduration & ";" & RATmark & ";" & RATbank)
 		'RATLabelInfo.Text = RATl
 		RATCanvasRes.DrawCircle(RATx0, RATy0, RATr, RATbColor, True, 3dip)
 		MainPanel.Invalidate3(RATx0 - 7dip, RATy0 - 7dip, RATx0 + 7dip, RATy0 + 7dip)
@@ -1242,6 +1263,12 @@ Sub GNGInit
 	GNGresult.Initialize
 	GNGresult.Clear
 	
+	GNGLabel1.Left = MainPanel.Width/2 - GNGLabel1.Width/2
+	GNGLabel2.Left = GNGLabel1.Left + 30
+	GNGLabel3.Left = GNGLabel1.Left + 30
+	GNGLabel4.Left = GNGLabel1.Left + 30 + GNGLabel2.Width + 30
+	GNGLabel5.Left = GNGLabel1.Left + 30 + GNGLabel2.Width + 30
+	
 	GNGLabel2.Text = Chr(0xE89F) : GNGLabel2.TextColor = Colors.Gray
 	GNGLabel3.Text = Chr(0xE89F) : GNGLabel3.TextColor = Colors.Gray
 	GNGLabel4.Text = Chr(0xE89F) : GNGLabel4.TextColor = Colors.Gray
@@ -1254,7 +1281,8 @@ Sub GNGtestTimer_Tick
 		If GNGn <> 0 Then
 			'Log("n = "&GNGn&", mark = "&GNGmark&", time = "&GNGtime&"/"&GNGtestTimer.Interval)
 			Log(session&";"&(GNGtime+GNGt0)&";"&name&";"&GNGn&";"&GNGmark&";"&GNGtime&";"&GNGtestTimer.Interval)
-			GNGresult.Add(session&";"&(GNGtime+GNGt0)&";"&name&";"&GNGn&";"&GNGmark&";"&GNGtime&";"&GNGtestTimer.Interval)
+			'GNGresult.Add(session&";"&(GNGtime+GNGt0)&";"&name&";"&GNGn&";"&GNGmark&";"&GNGtime&";"&GNGtestTimer.Interval)
+			GNGresult.Add((GNGtime+GNGt0) & ";" & GNGn & ";" & GNGmark & ";" & GNGtime &";" & GNGtestTimer.Interval)
 		End If
 				
 		Do While GNGi0 = GNGi
@@ -1616,33 +1644,35 @@ Sub SHOW_MAZE
 End Sub
 
 Sub TMTpanel_touch(Action As Int, tx As Float, ty As Float)
-	Select Action
-		Case MainPanel.ACTION_DOWN
-			If TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx > GetDeviceLayoutValues.Width/2 Then
-				TMTstart = "right"
-			else if TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx < GetDeviceLayoutValues.Width/2 Then
-				TMTstart = "left"
-			End If
-		Case MainPanel.ACTION_MOVE
-			'Log(MAZE_INVIS.Bitmap.GetPixel(tx, ty))
-			If TMTstart <> "" Then
-				MAZE_DISPLAY.DrawCircle(tx, ty, 10dip, Colors.Green, True, 1Dip)
-				Activity.Invalidate3(tx - 10dip, ty - 10dip, tx + 10dip, ty + 10dip)
+	If (ty >= 0 And ty <= MAZE_DISPLAY.Bitmap.Height) And (tx >= 0 And tx <= MAZE_DISPLAY.Bitmap.Width) Then
+		Select Action
+			Case MainPanel.ACTION_DOWN
+				If TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx > GetDeviceLayoutValues.Width/2 Then
+					TMTstart = "right"
+				else if TMTstart = "" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1 And tx < GetDeviceLayoutValues.Width/2 Then
+					TMTstart = "left"
+				End If
+			Case MainPanel.ACTION_MOVE
+				'Log(MAZE_INVIS.Bitmap.GetPixel(tx, ty))
+				If TMTstart <> "" Then
+					MAZE_DISPLAY.DrawCircle(tx, ty, 10dip, Colors.Green, True, 1Dip)
+					Activity.Invalidate3(tx - 10dip, ty - 10dip, tx + 10dip, ty + 10dip)
 				
-				TMTresult.Add(DateTime.Now & ";" & TMTn & ";" & (tx/GetDeviceLayoutValues.Width) & ";" & (ty/GetDeviceLayoutValues.Height) & ";" & MAZE_INVIS.Bitmap.GetPixel(tx, ty))
-			End If
-		Case MainPanel.ACTION_UP
-			If (TMTstart = "left" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx > GetDeviceLayoutValues.Width/2) Or (TMTstart = "right" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx < GetDeviceLayoutValues.Width/2) Then
-				TMTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/TMT."& session & ".csv",True))
-				TMTWriter.WriteList(TMTresult)
-				TMTWriter.Close
-				TMTresult.Clear
+					TMTresult.Add(DateTime.Now & ";" & TMTn & ";" & (tx/GetDeviceLayoutValues.Width) & ";" & (ty/GetDeviceLayoutValues.Height) & ";" & MAZE_INVIS.Bitmap.GetPixel(tx, ty))
+				End If
+			Case MainPanel.ACTION_UP
+				If (TMTstart = "left" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx > GetDeviceLayoutValues.Width/2) Or (TMTstart = "right" And MAZE_INVIS.Bitmap.GetPixel(tx, ty) = -1  And tx < GetDeviceLayoutValues.Width/2) Then
+					TMTWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/TMT."& session & ".csv",True))
+					TMTWriter.WriteList(TMTresult)
+					TMTWriter.Close
+					TMTresult.Clear
 				
-				TMTn = TMTn + 1 : TMTstart = "" : MainPanel.RemoveAllViews : MainPanel.LoadLayout("TMT") : MAZE_DISPLAY.Initialize(TMTpanel) : MAZE_INVIS.Initialize(TMTpanelInv) : MAZE_CREATE : SHOW_MAZE : TMTLabelN.Text = "Шаг " & TMTn & "/20"
-				TMTLabelName.Text = name
-			End If
-	End Select
-		
+					TMTn = TMTn + 1 : TMTstart = "" : MainPanel.RemoveAllViews : MainPanel.LoadLayout("TMT") : MAZE_DISPLAY.Initialize(TMTpanel) : MAZE_INVIS.Initialize(TMTpanelInv) : MAZE_CREATE : SHOW_MAZE : TMTLabelN.Text = "Шаг " & TMTn & "/20"
+					TMTLabelName.Text = name
+				End If
+		End Select
+	End If
+	
 	If TMTn = 21 Then
 		Msgbox("Исследование окончено, спасибо!","")
 
@@ -1722,64 +1752,68 @@ Sub CBTform
 End Sub
 
 Sub CBTpanel_touch(Action As Int, tx As Float, ty As Float)
-	Select Action
-		Case MainPanel.ACTION_UP
-			If CBTstarted = False Then
-				If Msgbox2("Длина последовательности - " & CBTmax, "Corsi block test", "Да", "", "Нет", Null) = DialogResponse.POSITIVE Then
-					CBTform : CBTstarted = True : CBTtimer.Enabled = True
-				End If
-			End If
-			Dim CBTtarget = CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1-1 As Int
-			If CBTstarted = True And CBTtimer.Enabled = False And CBTtarget >= 0 And CBTtarget <= 9 Then
-				If CBTcurrent <= CBTmax Then
-					CBTresult.Add((CBTn-1) & ";" & (DateTime.Now - CBTstart) & ";" & (CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1))
-					CBTstart = DateTime.Now
-					Dim CBTblock As Rect
-					Dim CBTtmp As coordinates
-					CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTtarget))
-					CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
-					CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
-					Activity.Invalidate
-					
-					If CBTcurrent = CBTmax Then
-						CBTDraw(CBTrnd, Colors.Gray, 9)
-						CBTtimerContinue.Enabled = True
+	If (ty >= 0 And ty <= CBTCanvasInvis.Bitmap.Height) And (tx >= 0 And tx <= CBTCanvasInvis.Bitmap.Width) Then
+		Select Action
+			Case MainPanel.ACTION_UP
+				If CBTstarted = False Then
+					If Msgbox2("Длина последовательности - " & CBTmax, "Corsi block test", "Да", "", "Нет", Null) = DialogResponse.POSITIVE Then
+						CBTform : CBTstarted = True : CBTtimer.Enabled = True
 					End If
-					
-					CBTcurrent = CBTcurrent + 1
-				Else
-					
 				End If
-			End If
-	End Select
+				Dim CBTtarget = CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1-1 As Int
+				If CBTstarted = True And CBTtimer.Enabled = False And CBTtarget >= 0 And CBTtarget <= 9 Then
+					If CBTcurrent <= CBTmax Then
+						CBTresult.Add((CBTn-1) & ";" & (DateTime.Now - CBTstart) & ";" & (CBTCanvasInvis.Bitmap.GetPixel(tx, ty)*-1))
+						CBTstart = DateTime.Now
+						Dim CBTblock As Rect
+						Dim CBTtmp As coordinates
+						CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTtarget))
+						CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+						CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
+						Activity.Invalidate
+						
+						If CBTcurrent = CBTmax Then
+							CBTDraw(CBTrnd, Colors.Gray, 9)
+							CBTtimerContinue.Enabled = True
+						End If
+						
+						CBTcurrent = CBTcurrent + 1
+					Else
+					
+					End If
+				End If
+		End Select
+	End If
 End Sub
 
 Sub CBTtimer_tick
-	Dim CBTblock As Rect
-	Dim CBTtmp As coordinates
-	If CBTi <= CBTmax - 1 Then
-		For i = 0 To 9
-			CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
-			CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
-			CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
-			CBTCanvasInvis.DrawRect(CBTblock, i*-1-1, True, 1dip)
-			Activity.Invalidate
-		Next
+	If ActiveView = "CBT" Then
+		Dim CBTblock As Rect
+		Dim CBTtmp As coordinates
+		If CBTi <= CBTmax - 1 Then
+			For i = 0 To 9
+				CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+				CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+				CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+				CBTCanvasInvis.DrawRect(CBTblock, i*-1-1, True, 1dip)
+				Activity.Invalidate
+			Next
 
-		CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTi))
-		CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
-		CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
-		Activity.Invalidate
-		CBTstart = DateTime.Now+1000
-		CBTi = CBTi + 1
-	Else
-		For i = 0 To 9
-			CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+			CBTtmp = coords.Get(CBTrnd.GetKeyAt(CBTi))
 			CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
-			CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+			CBTCanvas.DrawRect(CBTblock, Colors.Yellow, True, 1dip)
 			Activity.Invalidate
-		Next
-		CBTtimer.Enabled = False
+			CBTstart = DateTime.Now+1000
+			CBTi = CBTi + 1
+		Else
+			For i = 0 To 9
+				CBTtmp = coords.Get(CBTrnd.GetKeyAt(i))
+				CBTblock.Initialize(CBTtmp.x, CBTtmp.y, CBTtmp.x + CBTblocksize, CBTtmp.y + CBTblocksize)
+				CBTCanvas.DrawRect(CBTblock, Colors.blue, True, 1dip)
+				Activity.Invalidate
+			Next
+			CBTtimer.Enabled = False
+		End If
 	End If
 End Sub
 
@@ -1840,7 +1874,7 @@ End Sub
 '''''''''''''''''''''''''''''''''''                     tests                     '''''''''''''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Sub testsInit
-	ACToolBarLight1.Title = "Тесты"
+	ACToolBarLight1.Title = "Опросники"
 	ACToolBarLight1.SubTitle = "Классические опросники"
 	MainPanel.LoadLayout("tests")
 	testsLabelQuestion.Text = "Выберите тест:"
@@ -1961,7 +1995,6 @@ Sub dotest(q As List, qi As Int)
 
 		testLabel.Text = question(0) & ". " & question(1)
 		testButton1.Text = question(2)
-		Log(question.Length)
 		
 		If question.Length = 4 Then
 			testButton2.Text = question(3)
@@ -2036,7 +2069,8 @@ Sub testbutton1_click
 	If testButton1.Text = "Введите ответ" Then
 		questionrequester
 	Else
-		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton1.Text)
+		'testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton1.Text)
+		testresult.Add(testtime & ";" & testi & ";" & testButton1.Text)
 		Log(testresult.Get(testi-1))
 		testi = testi + 1
 		dotest(questions, testi)
@@ -2047,7 +2081,8 @@ Sub testbutton2_click
 	If testButton2.Text = "Введите ответ" Then
 		questionrequester
 	Else
-		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton2.Text)
+		'testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton2.Text)
+		testresult.Add(testtime & ";" & testi & ";" & testButton2.Text)
 		Log(testresult.Get(testi-1))
 		testi = testi + 1
 		dotest(questions, testi)
@@ -2058,7 +2093,8 @@ Sub testbutton3_click
 	If testButton3.Text = "Введите ответ" Then
 		questionrequester
 	Else
-		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton3.Text)
+		'testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton3.Text)
+		testresult.Add(testtime & ";" & testi & ";" & testButton3.Text)
 		Log(testresult.Get(testi-1))
 		testi = testi + 1
 		dotest(questions, testi)
@@ -2069,7 +2105,8 @@ Sub testbutton4_click
 	If testButton4.Text = "Введите ответ" Then
 		questionrequester
 	Else
-		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton4.Text)
+		'testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton4.Text)
+		testresult.Add(testtime & ";" & testi & ";" & testButton4.Text)
 		Log(testresult.Get(testi-1))
 		testi = testi + 1
 		dotest(questions, testi)
@@ -2080,7 +2117,8 @@ Sub testbutton5_click
 	If testButton5.Text = "Введите ответ" Then
 		questionrequester
 	Else
-		testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton5.Text)
+		'testresult.Add(testtime & ";" & name & ";" & testi & ";" & testButton5.Text)
+		testresult.Add(testtime & ";" & testi & ";" & testButton5.Text)
 		Log(testresult.Get(testi-1))
 		testi = testi + 1
 		dotest(questions, testi)
@@ -2095,7 +2133,8 @@ Sub questionrequester
 	Wait For (sf) Dialog_Result (Result As Int)
 	If Result = DialogResponse.POSITIVE Then
 		If True Then 'questionrequesterEditText.Text <> "" Then СДЕЛАТЬ ЖЕСТКОЕ УСЛОВИЕ ПОСЛЕ ВЫПУСКА В ПРОД???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-			testresult.Add(testtime & ";" & name & ";" & testi & ";" & questionrequesterEditText.Text)
+			'testresult.Add(testtime & ";" & name & ";" & testi & ";" & questionrequesterEditText.Text)
+			testresult.Add(testtime & ";" & testi & ";" & questionrequesterEditText.Text)
 			Log(testresult.Get(testi-1))
 			testi = testi + 1
 			dotest(questions, testi)
