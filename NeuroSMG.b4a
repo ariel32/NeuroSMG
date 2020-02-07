@@ -467,8 +467,9 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 	End If
 		
 	If Value = "Профиль" Then
-		LoginInit
+		ActiveView = "login"
 		p.SetScreenOrientation(1)
+		LoginInit
 	Else If Value = "FOT" Then
 		ActiveView = "FOT"
 		p.SetScreenOrientation(1)
@@ -509,9 +510,8 @@ Sub ListViewLeft_ItemClick (Position As Int, Value As Object)
 End Sub
 
 Sub MainPanel_Touch(Action As Int, tx As Float, ty As Float)
-	Log(group)
 	If ActiveView = "FOT" Then
-		Select Action
+Select Action
 			Case MainPanel.ACTION_DOWN
 				FOTt1 = DateTime.Now
 			Case MainPanel.ACTION_UP
