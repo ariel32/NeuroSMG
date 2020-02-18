@@ -683,7 +683,7 @@ Select Action
 					IATresult.Clear
 					
 					RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-					RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+					RESWriter.WriteLine(session & ";" & group & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 					RESWriter.Close
 					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/IAT."& session & ".csv", True)
 				End If
@@ -895,7 +895,7 @@ Sub FOTButtonReset_Click
 		FOTresult.Clear
 		If FOThand = "left" Then
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(session & ";" & group & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 			RESWriter.Close
 		End If
 		
@@ -1069,7 +1069,7 @@ Sub RATPump
 				RATresult.Clear
 				
 				RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-				RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+				RESWriter.WriteLine(session & ";" & group & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 				RESWriter.Close
 				
 				RATE = 0
@@ -1315,7 +1315,7 @@ Sub GNGtestTimer_Tick
 		GNGWriter.Close
 		
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 		RESWriter.Close
 		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/GNG."& session & ".csv", True)
@@ -1431,7 +1431,7 @@ Sub SCTdoTest
 			SCTresult.Clear
 			
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(session & ";" & group & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 			RESWriter.Close
 			
 			ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/SCT."& session & ".csv", True)
@@ -1677,7 +1677,7 @@ Sub TMTpanel_touch(Action As Int, tx As Float, ty As Float)
 		Msgbox("Исследование окончено, спасибо!","")
 
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & "TMT" & ";" & name & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "TMT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 		RESWriter.Close
 
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/TMT."& session & ".csv", True)
@@ -1839,7 +1839,7 @@ Sub CBTtimerContinue_tick
 		CBTresult.Clear
 		
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & "CBT" & ";" & name & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "CBT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 		RESWriter.Close
 		
 		CBTInit
@@ -2052,7 +2052,7 @@ Sub dotest(q As List, qi As Int)
 		testresult.Clear
 					
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(DateTime.Now & ";" & session & ";" & group & ";" & testCurrent & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & testCurrent & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
 		RESWriter.Close
 		
 		MainPanel.RemoveAllViews
