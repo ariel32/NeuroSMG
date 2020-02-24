@@ -8,18 +8,19 @@ File14=Left.bal
 File15=leongard.csv
 File16=login.bal
 File17=main.bal
-File18=mini.mult.csv
-File19=questionrequester.bal
+File18=mast.csv
+File19=mini.mult.csv
 File2=anamnesis.csv
-File20=RAT.bal
-File21=schubert.csv
-File22=SCT.bal
-File23=smil.f.csv
-File24=smil.m.csv
-File25=stai.csv
-File26=test.bal
-File27=tests.bal
-File28=TMT.bal
+File20=questionrequester.bal
+File21=RAT.bal
+File22=schubert.csv
+File23=SCT.bal
+File24=smil.f.csv
+File25=smil.m.csv
+File26=stai.csv
+File27=test.bal
+File28=tests.bal
+File29=TMT.bal
 File3=archive.bal
 File4=audit.csv
 File5=buss.durkey.csv
@@ -48,6 +49,7 @@ FileGroup25=Default Group
 FileGroup26=Default Group
 FileGroup27=Default Group
 FileGroup28=Default Group
+FileGroup29=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
 FileGroup5=Default Group
@@ -76,7 +78,7 @@ Module3=FileProvider
 Module4=CustomListView
 Module5=StateManager
 Module6=test
-NumberOfFiles=28
+NumberOfFiles=29
 NumberOfLibraries=12
 NumberOfModules=6
 Version=9.01
@@ -683,7 +685,7 @@ Select Action
 					IATresult.Clear
 					
 					RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-					RESWriter.WriteLine(session & ";" & group & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+					RESWriter.WriteLine(session & ";" & group & ";" & "IAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 					RESWriter.Close
 					ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/IAT."& session & ".csv", True)
 				End If
@@ -895,8 +897,9 @@ Sub FOTButtonReset_Click
 		FOTresult.Clear
 		If FOThand = "left" Then
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(session & ";" & group & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(session & ";" & group & ";" & "FOT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 			RESWriter.Close
+			session = DateTime.Now
 		End If
 		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/FOT."& session & ".csv", True)
@@ -1069,7 +1072,7 @@ Sub RATPump
 				RATresult.Clear
 				
 				RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-				RESWriter.WriteLine(session & ";" & group & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+				RESWriter.WriteLine(session & ";" & group & ";" & "RAT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 				RESWriter.Close
 				
 				RATE = 0
@@ -1315,7 +1318,7 @@ Sub GNGtestTimer_Tick
 		GNGWriter.Close
 		
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "GNG" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 		RESWriter.Close
 		
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal & "/data/GNG."& session & ".csv", True)
@@ -1431,7 +1434,7 @@ Sub SCTdoTest
 			SCTresult.Clear
 			
 			RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-			RESWriter.WriteLine(session & ";" & group & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+			RESWriter.WriteLine(session & ";" & group & ";" & "SCT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 			RESWriter.Close
 			
 			ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/SCT."& session & ".csv", True)
@@ -1657,7 +1660,7 @@ Sub TMTpanel_touch(Action As Int, tx As Float, ty As Float)
 				If TMTstart <> "" Then
 					MAZE_DISPLAY.DrawCircle(tx, ty, 10dip, Colors.Green, True, 1Dip)
 					Activity.Invalidate3(tx - 10dip, ty - 10dip, tx + 10dip, ty + 10dip)
-				
+					
 					TMTresult.Add(DateTime.Now & ";" & TMTn & ";" & (tx/GetDeviceLayoutValues.Width) & ";" & (ty/GetDeviceLayoutValues.Height) & ";" & MAZE_INVIS.Bitmap.GetPixel(tx, ty))
 				End If
 			Case MainPanel.ACTION_UP
@@ -1677,7 +1680,7 @@ Sub TMTpanel_touch(Action As Int, tx As Float, ty As Float)
 		Msgbox("Исследование окончено, спасибо!","")
 
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & "TMT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "TMT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 		RESWriter.Close
 
 		ToastMessageShow ("Данные были успешно сохранены в файл " & File.DirInternal& "/data/TMT."& session & ".csv", True)
@@ -1839,7 +1842,7 @@ Sub CBTtimerContinue_tick
 		CBTresult.Clear
 		
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & "CBT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & "CBT" & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 		RESWriter.Close
 		
 		CBTInit
@@ -1898,6 +1901,7 @@ Sub testsInit
 	testsCustomListView.AddTextItem("Опросник Мини-мульт", "mini.mult")
 	testsCustomListView.AddTextItem("Характерологический опросник Леонгарда", "leongard")
 	testsCustomListView.AddTextItem("Личностный опросник Г. Айзенка", "eysenck")
+	testsCustomListView.AddTextItem("MAST-тест", "mast")
 	
 	testi = 1
 End Sub
@@ -1976,6 +1980,11 @@ Sub testsCustomListView_ItemClick (Index As Int, Value As Object)
 			ACToolBarLight1.Title = "Классические опросники"
 			ACToolBarLight1.SubTitle = "СМИЛ (женский)"
 		End If
+	else If Value = "mast" Then
+		questions = su.LoadCSV(File.DirAssets, "mast.csv", ";")
+		testCurrent = "mast"
+		ACToolBarLight1.Title = "Классические опросники"
+		ACToolBarLight1.SubTitle = "MAST-тест"
 	End If
 	
 	dotest(questions, testi)
@@ -2052,7 +2061,7 @@ Sub dotest(q As List, qi As Int)
 		testresult.Clear
 					
 		RESWriter.Initialize(File.OpenOutput(File.DirInternal,"/data/private.csv",True))
-		RESWriter.WriteLine(session & ";" & group & ";" & testCurrent & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment)
+		RESWriter.WriteLine(session & ";" & group & ";" & testCurrent & ";" & name & ";" & sex & ";" & age & ";" & dhand & ";" & comment & ";" & p.Manufacturer & "|" & p.Model & "|" & p.Product & "|" & GetDeviceLayoutValues.Width & "|" & GetDeviceLayoutValues.Height)
 		RESWriter.Close
 		
 		MainPanel.RemoveAllViews
